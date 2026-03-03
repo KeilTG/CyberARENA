@@ -13,6 +13,9 @@ if (localStorage.getItem('isDeveloper') === 'true') {
     var adminLink = document.getElementById('admin-link');
     if (adminLink) adminLink.classList.remove('footer__link--hidden');
 }
+var mainContent = document.getElementById('main-content');
+var leaderboardContent = document.getElementById('leaderboard-content');
+var welcomeContent = document.getElementById('welcome-content');
 
 function hideWelcome() {
     welcomeContent.classList.add('welcome-card--hidden');
@@ -74,3 +77,5 @@ function renderLeaderboard() {
             '<td class="leaderboard__coins">' + (item.coins || 0) + '</td></tr>';
     }).join('');
 }
+    leaderboardContent.classList.remove('leaderboard--hidden');
+});
