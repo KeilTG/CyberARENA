@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="kiber-arena.css">
+    <style>
+        .booking__grid { gap: 22px; }
+    </style>
     <title>Кибер-арена</title>
 </head>
 <body>
@@ -13,15 +16,23 @@
         </a>
         <nav class="header__nav">
             <a href="#" class="header__link" id="nav-main">Главная</a>
-            <a href="#" class="header__link">Бронирование</a>
+            <a href="#" class="header__link" id="nav-booking">Бронирование</a>
             <a href="#" class="header__link" id="nav-tournaments">Турниры</a>
             <a href="#" class="header__link" id="nav-leaderboard">Лидерборд</a>
+            <a href="#" class="header__link" id="nav-leaderboard">Мои достижения</a>
+            <a href="#" class="header__link" id="nav-leaderboard">Обмен коинов</a>
         </nav>
-        <a href="forma-kiber/forma-signup.html" class="header__btn">Зарегистрироваться</a>
+        <div class="header__user-area" id="header-user-area">
+            <a href="forma-kiber/forma-signup.html" class="header__btn" id="header-register-btn">Зарегистрироваться</a>
+        </div>
     </header>
 
     <section class="welcome-card" id="welcome-content">
-        <p class="welcome-card__text">Выберите, что вас интересует, в шапке сайта</p>
+        <div class="welcome-card__inner">
+            <span class="welcome-card__icon">↑</span>
+            <h2 class="welcome-card__title">Выберите раздел</h2>
+            <p class="welcome-card__text">Перейдите в интересующий вас раздел в меню выше</p>
+        </div>
     </section>
 
     <main class="main main--hidden" id="main-content">
@@ -87,7 +98,48 @@
         </section>
     </main>
 
+    <section class="booking booking--hidden" id="booking-content">
+        <div class="booking__layout">
+            <div class="booking__grid-wrap">
+                <h2 class="booking__title">Бронирование компьютеров</h2>
+                <div class="booking__grid" id="booking-grid"></div>
+            </div>
+            <aside class="booking__sidebar">
+                <h3 class="booking__sidebar-title">Информация о ПК</h3>
+                <div class="booking__pc-info" id="booking-pc-info">
+                    <p class="booking__pc-placeholder">Выберите место, чтобы увидеть характеристики</p>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <div class="modal modal--hidden" id="booking-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <h3 class="modal__title">Бронирование места <span id="booking-modal-seat"></span></h3>
+            <form class="modal__form" id="booking-form">
+                <div class="form-group">
+                    <label>На какое время бронируете?</label>
+                    <input type="text" id="booking-time" placeholder="Например: 14:00-16:00" required>
+                </div>
+                <div class="modal__actions">
+                    <button type="button" class="admin-btn" id="booking-cancel">Отмена</button>
+                    <button type="submit" class="admin-btn admin-btn--primary">Забронировать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <section class="tournaments tournaments--hidden" id="tournaments-content">
+        <div class="tournaments__filter" id="tournaments-filter">
+            <button type="button" class="tournaments__filter-btn tournaments__filter-btn--active" data-category="">Все</button>
+            <button type="button" class="tournaments__filter-btn" data-category="CS2">CS2</button>
+            <button type="button" class="tournaments__filter-btn" data-category="Valorant">Valorant</button>
+            <button type="button" class="tournaments__filter-btn" data-category="Clash Royale">Clash Royale</button>
+            <button type="button" class="tournaments__filter-btn" data-category="Brawl Stars">Brawl Stars</button>
+            <button type="button" class="tournaments__filter-btn" data-category="Fortnite">Fortnite</button>
+            <button type="button" class="tournaments__filter-btn" data-category="WOT">WOT</button>
+        </div>
         <div class="tournaments__grid" id="tournaments-grid"></div>
     </section>
 
