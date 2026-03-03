@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="forma-signin.css">
+    <title>Sign in "Кибер-арена"</title>
+</head>
+<body>
+  <div class="signin-page">
+    <header class="page-header">
+      <img src="logo.png" alt="Московское образование. IT.МОСКВА" class="page-header__logo">
+    </header>
+    <div class="container">
+    <div class="heading">Вход</div>
+    <div class="heading kiber">Кибер-арена</div>
+    <form action="" class="form" id="signin-form">
+      <input required="" class="input" type="email" name="email" id="email" placeholder="Почта">
+      <input required="" class="input" type="password" name="password" id="password" placeholder="Пароль">
+      <span class="forgot-password"><a href="#"></a></span>
+      <input class="login-button" type="submit" value="Войти">
+      
+    </form>
+    <div class="social-account-container">
+        
+    </div>
+	<p class="signup">Нет аккаунта?
+		<a rel="noopener noreferrer" href="forma-signup.html" class="regi">Регистрация</a>
+	</p>
+</div>
+  </div>
+  <script src="../kiber-arena-data.js"></script>
+  <script>
+    (function() {
+      if (typeof initStorage === 'function') initStorage();
+      var form = document.getElementById('signin-form');
+      if (form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          var email = (document.getElementById('email') || {}).value;
+          var password = (document.getElementById('password') || {}).value;
+          if (!email || !password) return;
+          var users = typeof getUsers === 'function' ? getUsers() : [];
+          var user = users.find(function(u) { return u.email === email && u.password === password; });
+          if (user && typeof setCurrentUser === 'function') {
+            setCurrentUser(user);
+            window.location.href = '../kiber-arena.html';
+          } else {
+            alert('Неверный email или пароль');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
