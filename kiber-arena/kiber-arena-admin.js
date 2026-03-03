@@ -37,8 +37,14 @@ function openEventModal(ev) {
   currentMode = 'event';
   currentEditId = ev ? ev.id : null;
   modalTitle.textContent = ev ? 'Редактировать мероприятие' : 'Добавить мероприятие';
+  var cats = typeof EVENT_CATEGORIES !== 'undefined' ? EVENT_CATEGORIES : ['CS2', 'Valorant', 'Clash Royale', 'Brawl Stars', 'Fortnite', 'WOT'];
+  var catOpts = cats.map(function(c) {
+    var sel = (ev && ev.category === c) ? ' selected' : '';
+    return '<option value="' + c + '"' + sel + '>' + c + '</option>';
+  }).join('');
   modalFields.innerHTML =
     '<div class="form-group"><label>Название</label><input type="text" name="name" value="' + (ev ? (ev.name || '').replace(/"/g, '&quot;') : '') + '" required></div>' +
+    '<div class="form-group"><label>Категория</label><select name="category"><option value="">—</option>' + catOpts + '</select></div>' +
     '<div class="form-group"><label>URL изображения</label><input type="url" name="image" value="' + (ev ? (ev.image || '').replace(/"/g, '&quot;') : '') + '" placeholder="https://..."></div>';
   modal.classList.remove('modal--hidden');
 }
@@ -65,7 +71,7 @@ function closeModal() {
 function saveEvent() {
   var form = modalForm;
   var events = getEvents();
-  var data = { name: form.name.value, image: form.image.value || '' };
+  var data = { name: form.name.value, category: (form.category && form.category.value) || '', image: form.image.value || '' };
   if (currentEditId) {
     var idx = events.findIndex(function(e) { return e.id === currentEditId; });
     if (idx >= 0) events[idx] = Object.assign({}, events[idx], data);

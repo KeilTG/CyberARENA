@@ -33,8 +33,7 @@
         <section class="form-card">
             <h1 class="form-card__title">Регистрация на: Кибер-арена</h1>
             <p class="form-card__subtitle">Поля, отмеченные * обязательны для заполнения.</p>
-            
-            <form class="form" id="signup-form">
+            <form action="" class="form" id="signup-form">
                 <div class="form__row">
                     <div class="form__field">
                         <label for="fio">ФИО*</label>
@@ -76,10 +75,32 @@
             </form>
         </section>
     </div>
-    
-    <!-- Контейнер для уведомления -->
-    <div id="notification-container" class="notification-container"></div>
-    
-    <script src="forma-signup.js"></script>
+    <script src="../kiber-arena-data.js"></script>
+    <script>
+        (function() {
+            if (typeof initStorage === 'function') initStorage();
+            var form = document.getElementById('signup-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var fio = (document.getElementById('fio') || {}).value;
+                    var email = (document.getElementById('email') || {}).value;
+                    var group = (document.getElementById('group') || {}).value;
+                    var password = (document.getElementById('password') || {}).value;
+                    if (!fio || !email || !group || !password) return;
+                    var users = typeof getUsers === 'function' ? getUsers() : [];
+                    var lb = typeof getLeaderboard === 'function' ? getLeaderboard() : [];
+                    var colorIdx = lb.length % (typeof AVATAR_COLORS !== 'undefined' ? AVATAR_COLORS.length : 6);
+                    var avatarColor = typeof AVATAR_COLORS !== 'undefined' ? AVATAR_COLORS[colorIdx] : 'linear-gradient(135deg, #5582FF, #4568dc)';
+                    var user = { fio: fio, email: email, group: group, password: password, avatarColor: avatarColor };
+                    users.push(user);
+                    if (typeof setUsers === 'function') setUsers(users);
+                    if (typeof addUserToLeaderboard === 'function') addUserToLeaderboard(fio, group);
+                    if (typeof setCurrentUser === 'function') setCurrentUser(user);
+                    window.location.href = '../kiber-arena.html';
+                });
+            }
+        })();
+    </script>
 </body>
 </html>
