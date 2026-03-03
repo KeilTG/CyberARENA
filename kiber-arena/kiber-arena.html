@@ -12,15 +12,19 @@
             <img src="forma-kiber/logo.png" alt="Московское образование. IT.МОСКВА">
         </a>
         <nav class="header__nav">
-            <a href="#" class="header__link">Главная</a>
+            <a href="#" class="header__link" id="nav-main">Главная</a>
             <a href="#" class="header__link">Бронирование</a>
             <a href="#" class="header__link">Турниры</a>
-            <a href="#" class="header__link">Лидерборд</a>
+            <a href="#" class="header__link" id="nav-leaderboard">Лидерборд</a>
         </nav>
         <a href="forma-kiber/forma-signup.html" class="header__btn">Зарегистрироваться</a>
     </header>
 
-    <main class="main">
+    <section class="welcome-card" id="welcome-content">
+        <p class="welcome-card__text">Выберите, что вас интересует, в шапке сайта</p>
+    </section>
+
+    <main class="main main--hidden" id="main-content">
         <section class="block">
             <h2 class="block__title">
                 <span class="block__icon">✦</span>
@@ -65,6 +69,7 @@
                 <li>Участие в турнирах и командных матчах</li>
                 <li>Возможность принести свою технику</li>
                 <li>Доступ к полному спектру популярных игр</li>
+                <li>На этом сайте действует своя валюта в виде ARcoins (Arena-Coins). Заробатывая ее, вы сможете обменивать коины на подарки.</li>
             </ul>
             <br>
             <p class="pravila">
@@ -81,5 +86,112 @@
             </p>
         </section>
     </main>
+
+    <section class="leaderboard leaderboard--hidden" id="leaderboard-content">
+        <div class="leaderboard__toolbar">
+            <div class="leaderboard__search">
+                <svg class="leaderboard__search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="leaderboard__search-input" placeholder="Поиск студента...">
+            </div>
+            <button class="leaderboard__filters" type="button">
+                <svg class="leaderboard__filter-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                Фильтры
+            </button>
+        </div>
+        <div class="leaderboard__table-wrap">
+            <table class="leaderboard__table">
+                <thead>
+                    <tr>
+                        <th class="leaderboard__th leaderboard__th--sortable">МЕСТО <span class="leaderboard__sort">↕</span></th>
+                        <th class="leaderboard__th leaderboard__th--sortable">СТУДЕНТ <span class="leaderboard__sort">↕</span></th>
+                        <th class="leaderboard__th leaderboard__th--sortable">ГРУППА <span class="leaderboard__sort">↕</span></th>
+                        <th class="leaderboard__th leaderboard__th--sortable leaderboard__th--active">ARCOINs<span class="leaderboard__sort leaderboard__sort--desc">↓</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place"><span class="leaderboard__medal leaderboard__medal--gold">1</span></td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #e8b923, #d4942e);">ПА</span>
+                            <span>Пашинин Артём Сергеевич</span>
+                        </td>
+                        <td>2ИП-2-24</td>
+                        <td class="leaderboard__coins">65</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place"><span class="leaderboard__medal leaderboard__medal--silver">2</span></td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #c0c0c0, #9e9e9e);">АД</span>
+                            <span>Архипов Дмитрий Алексеевич</span>
+                        </td>
+                        <td>1ВР-1-25</td>
+                        <td class="leaderboard__coins">10</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place"><span class="leaderboard__medal leaderboard__medal--bronze">3</span></td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #cd7f32, #a0522d);">ГГ</span>
+                            <span>Гаджиев Гаджи Дагирович</span>
+                        </td>
+                        <td>1ИП-1-25</td>
+                        <td class="leaderboard__coins">10</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place">4</td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #6eb5ff, #4a90d9);">АА</span>
+                            <span>Алямкин Артём</span>
+                        </td>
+                        <td>2ИП-1-24</td>
+                        <td class="leaderboard__coins">10</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place">5</td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #ff9ecd, #e85a9a);">ММ</span>
+                            <span>Мария Евгеньевна Мартынова</span>
+                        </td>
+                        <td>1РКИ-1-25</td>
+                        <td class="leaderboard__coins">10</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place">6</td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #a78bfa, #7c3aed);">ИС</span>
+                            <span>Иванов Сергей Петрович</span>
+                        </td>
+                        <td>2ИС-2-24</td>
+                        <td class="leaderboard__coins">8</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place">7</td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #34d399, #10b981);">КМ</span>
+                            <span>Козлова Мария Александровна</span>
+                        </td>
+                        <td>1ВР-2-25</td>
+                        <td class="leaderboard__coins">5</td>
+                    </tr>
+                    <tr class="leaderboard__row">
+                        <td class="leaderboard__place">8</td>
+                        <td class="leaderboard__student">
+                            <span class="leaderboard__avatar" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);">ПД</span>
+                            <span>Петров Дмитрий Игоревич</span>
+                        </td>
+                        <td>2ИП-2-24</td>
+                        <td class="leaderboard__coins">3</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script src="kiber-arena.js">
+    </script>
 </body>
 </html>

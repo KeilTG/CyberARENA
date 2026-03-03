@@ -237,18 +237,17 @@ body > * {
 }
 
 .form__submit {
+  display: block;
   width: 100%;
-  padding: 14px 24px;
-  margin-top: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
+  font-weight: bold;
   background: #5582FF;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  color: white;
+  padding-block: 15px;
+  margin: 20px auto;
+  border-radius: 20px;
   box-shadow: 0 0 20px rgba(85, 130, 255, 0.6), 0 0 40px rgba(85, 130, 255, 0.3);
+  border: none;
+  transition: all 0.2s ease-in-out;
 }
 
 .form__submit:hover {
