@@ -248,15 +248,18 @@ body > * {
   box-shadow: 0 0 20px rgba(85, 130, 255, 0.6), 0 0 40px rgba(85, 130, 255, 0.3);
   border: none;
   transition: all 0.2s ease-in-out;
+  cursor: pointer; /* Курсор-палец при наведении */
 }
 
 .form__submit:hover {
   transform: scale(1.02);
   box-shadow: 0 0 25px rgba(85, 130, 255, 0.8), 0 0 50px rgba(85, 130, 255, 0.5);
+  cursor: pointer; /* Для надежности */
 }
 
 .form__submit:active {
   transform: scale(0.98);
+  cursor: pointer;
 }
 
 .form__disclaimer {
@@ -280,4 +283,215 @@ body > * {
   .form-card__title {
     font-size: 1.25rem;
   }
+}
+/* Добавьте в конец файла */
+
+/* Контейнер для уведомления */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 350px;
+}
+
+/* Стили для уведомления об успехе */
+.notification-success {
+    background: #252525;
+    border-left: 4px solid #00ff88;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    color: white;
+    font-size: 1rem;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* Иконка */
+.notification-success__icon {
+    font-size: 1.5rem;
+    color: #00ff88;
+}
+
+/* Анимация появления */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Анимация исчезновения */
+.notification-success.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 600px) {
+    .notification-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+/* Контейнер для уведомления */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 350px;
+}
+
+/* Стили для уведомления об успехе */
+.notification-success {
+    background: #252525;
+    border-left: 4px solid #00ff88;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    color: white;
+    font-size: 1rem;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* Иконка */
+.notification-success__icon {
+    font-size: 1.5rem;
+    color: #00ff88;
+}
+
+/* Анимация появления */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Анимация исчезновения */
+.notification-success.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 600px) {
+    .notification-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+/* Добавьте в конец файла */
+
+/* Контейнер для уведомления */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 350px;
+}
+
+/* Стили для уведомления об успехе */
+.notification-success {
+    background: #252525;
+    border-left: 4px solid #00ff88;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    color: white;
+    font-size: 1rem;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+/* Иконка */
+.notification-success__icon {
+    font-size: 1.5rem;
+    color: #00ff88;
+}
+
+/* Анимация появления */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Анимация исчезновения */
+.notification-success.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 600px) {
+    .notification-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
 }
