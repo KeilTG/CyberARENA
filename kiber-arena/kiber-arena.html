@@ -14,6 +14,7 @@
         <nav class="header__nav">
             <a href="#" class="header__link" id="nav-main">Главная</a>
             <a href="#" class="header__link">Бронирование</a>
+            <a href="#" class="header__link" id="nav-tournaments">Турниры</a>
             <a href="#" class="header__link">Турниры</a>
             <a href="#" class="header__link" id="nav-leaderboard">Лидерборд</a>
         </nav>
@@ -87,6 +88,10 @@
         </section>
     </main>
 
+    <section class="tournaments tournaments--hidden" id="tournaments-content">
+        <div class="tournaments__grid" id="tournaments-grid"></div>
+    </section>
+
     <section class="leaderboard leaderboard--hidden" id="leaderboard-content">
         <div class="leaderboard__toolbar">
             <div class="leaderboard__search">
@@ -113,6 +118,7 @@
                         <th class="leaderboard__th leaderboard__th--sortable leaderboard__th--active">ARCOINs<span class="leaderboard__sort leaderboard__sort--desc">↓</span></th>
                     </tr>
                 </thead>
+                <tbody></tbody>
                 <tbody>
                     <tr class="leaderboard__row">
                         <td class="leaderboard__place"><span class="leaderboard__medal leaderboard__medal--gold">1</span></td>
@@ -191,6 +197,19 @@
         </div>
     </section>
 
+    <footer class="footer">
+        <a href="kiber-arena.html" class="footer__logo">
+            <img src="forma-kiber/logo.png" alt="IT.МОСКВА">
+        </a>
+        <nav class="footer__nav">
+            <a href="#" class="footer__link">О нас</a>
+            <a href="forma-kiber/forma-signin.html" class="footer__link">Личный кабинет</a>
+            <a href="kiber-arena-admin.html" class="footer__link footer__link--admin footer__link--hidden" id="admin-link">Админ-панель</a>
+        </nav>
+        <p class="footer__copy">IT.Москва | &copy;2026 все права защищены</p>
+    </footer>
+
+    <script src="kiber-arena-data.js"></script>
     <script src="kiber-arena.js">
     </script>
 </body>

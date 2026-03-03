@@ -208,6 +208,71 @@ body > * {
   margin-bottom: 6px;
 }
 
+/* Турниры / Мероприятия */
+.tournaments.tournaments--hidden {
+  display: none;
+}
+
+.tournaments {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.tournaments__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.event-card {
+  background: #252525;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.25), 0 0 60px rgba(85, 130, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+}
+
+.event-card__title {
+  margin: 0;
+  padding: 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(85, 130, 255, 0.6);
+}
+
+.event-card__image {
+  flex: 1;
+  min-height: 180px;
+  background: #1a1a1a;
+  background-size: cover;
+  background-position: center;
+}
+
+.event-card__footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.event-card__btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  color: #5582FF;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.event-card__btn:hover {
+  opacity: 0.8;
+}
+
 /* Лидерборд */
 .leaderboard.leaderboard--hidden {
   display: none;
@@ -471,4 +536,57 @@ body > * {
     height: 32px;
     font-size: 0.65rem;
   }
+
+  .footer {
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px 20px;
+  }
+
+  .footer__nav {
+    gap: 24px;
+  }
+}
+
+/* Подвал */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 24px 32px;
+  background: #1a1a1a;
+  border-top: 1px solid #353535;
+}
+
+.footer__logo img {
+  height: 32px;
+  width: auto;
+}
+
+.footer__nav {
+  display: flex;
+  gap: 32px;
+}
+
+.footer__link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.footer__link:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.footer__copy {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__link--hidden {
+  display: none;
 }
