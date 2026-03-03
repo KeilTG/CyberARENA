@@ -1,18 +1,57 @@
-/* From Uiverse.io by Smit-Prajapati */
+/* Тёмная тематика с синим неоном — киберспорт / видеоигры */
 
 html, body {
   margin: 0;
   min-height: 100vh;
   box-sizing: border-box;
-  background-color: #1a1a1a;
 }
 
 body {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(85, 130, 255, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(85, 130, 255, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 50%, rgba(85, 130, 255, 0.08), transparent),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 60px,
+      rgba(85, 130, 255, 0.03) 60px,
+      rgba(85, 130, 255, 0.03) 61px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(85, 130, 255, 0.03) 60px,
+      rgba(85, 130, 255, 0.03) 61px
+    ),
+    linear-gradient(180deg, #0a0a12 0%, #0d0d1a 30%, #0a0a14 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(105deg, transparent 48%, rgba(85, 130, 255, 0.06) 50%, transparent 52%),
+    linear-gradient(-75deg, transparent 48%, rgba(85, 130, 255, 0.04) 50%, transparent 52%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 .signin-page {
