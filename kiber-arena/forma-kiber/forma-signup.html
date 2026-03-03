@@ -12,7 +12,7 @@
             <img src="logo.png" alt="Московское образование. IT.МОСКВА" class="page-header__logo">
         </header>
         <a href="forma-signin.html" class="back-button">← Уже есть аккаунт? Войти</a>
-        <!-- Блок «Что такое Кибер-Арена» -->
+        
         <section class="info-card">
             <h2 class="info-card__title">
                 <span class="info-card__icon">✦</span>
@@ -29,6 +29,7 @@
                 <span class="info-card__emoji">🚀</span>
             </p>
         </section>
+        
         <section class="form-card">
             <h1 class="form-card__title">Регистрация на: Кибер-арена</h1>
             <p class="form-card__subtitle">Поля, отмеченные * обязательны для заполнения.</p>
@@ -42,7 +43,6 @@
                         <label for="email">Email*</label>
                         <input required type="email" id="email" name="email" placeholder="example@yandex.ru">
                     </div>
-                    
                 </div>
 
                 <div class="form__row">
@@ -51,21 +51,23 @@
                         <input required type="text" id="group" name="group" placeholder="1И-1-25">
                     </div>
                     <div class="form__field">
-                        <label for="email">Пароль*</label>
+                        <label for="password">Пароль*</label>
                         <input required type="password" id="password" name="password" placeholder="пароль">
                     </div>
                 </div>
+                
                 <div class="form__row">
                     <div class="form__field">
                         <label for="role">Ваша цель*</label>
                         <select required id="role" name="role">
-                            <option value="">Выберите цель  </option>
+                            <option value="">Выберите цель</option>
                             <option value="player">Командная игра</option>
                             <option value="analyst">Тренировки</option>
                             <option value="captain">Участие в турнирах</option>
                         </select>
                     </div>
                 </div>
+                
                 <button type="submit" class="form__submit">Отправить</button>
                 <p class="form__disclaimer">
                     Нажимая кнопку «Отправить», вы соглашаетесь на обработку персональных данных.
