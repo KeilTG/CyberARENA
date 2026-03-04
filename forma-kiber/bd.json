@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "email": "Keil2023@yandex.ru",
+        "password": "123",
+        "fio": "Назарко Егор Алексеевич",
+        "group": "123",
+        "role": "player",
+        "registered_at": "2026-03-03T23:23:59.657652"
+    },
+    {
+        "id": 2,
+        "email": "keil2023@yandex.ru",
+        "password": "123",
+        "fio": "Назарко Егор Алексеевич",
+        "group": "1231",
+        "role": "analyst",
+        "registered_at": "2026-03-03T23:28:11.539011"
+    }
+]
