@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="kiber-arena-admin.css">
+    <title>Админ-панель — Кибер-арена</title>
+</head>
+<body>
+    <header class="admin-header">
+        <a href="kiber-arena.html" class="admin-header__back">← На главную</a>
+        <h1 class="admin-header__title">Админ-панель</h1>
+    </header>
+
+    <main class="admin-main">
+        <section class="admin-section">
+            <h2 class="admin-section__title">Мероприятия</h2>
+            <button class="admin-btn admin-btn--primary" id="add-event-btn">+ Добавить мероприятие</button>
+            <div class="admin-list" id="events-list"></div>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-section__title">Лидерборд</h2>
+            <button class="admin-btn admin-btn--primary" id="add-leader-btn">+ Добавить участника</button>
+            <div class="admin-list" id="leaderboard-list"></div>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-section__title">Турниры: матчи и награды</h2>
+            <p class="admin-section__sub">Настройка матчей (участники, счёт) и наград за места в турнирах</p>
+            <div class="admin-list" id="tournaments-admin-list"></div>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-section__title">Обмен коинов: цены</h2>
+            <p class="admin-section__sub">Настройка цен на рамки аватарки и баннеры во вкладке «Обмен коинов»</p>
+            <div class="exchange-prices-block">
+                <h3 class="exchange-prices-block__title">Рамки аватарки</h3>
+                <div class="admin-list" id="exchange-frames-prices"></div>
+            </div>
+            <div class="exchange-prices-block">
+                <h3 class="exchange-prices-block__title">Баннеры</h3>
+                <div class="admin-list" id="exchange-banners-prices"></div>
+            </div>
+            <button type="button" class="admin-btn admin-btn--primary" id="exchange-prices-save">Сохранить цены</button>
+        </section>
+
+        <section class="admin-section">
+            <h2 class="admin-section__title">Пользователи</h2>
+            <p class="admin-section__sub">Управление активными бронями, историей бронирований и начисление ARcoins</p>
+            <div class="admin-list" id="users-list"></div>
+        </section>
+    </main>
+
+    <div class="modal modal--hidden" id="modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <h3 class="modal__title" id="modal-title">Редактировать</h3>
+            <form class="modal__form" id="modal-form">
+                <div id="modal-fields"></div>
+                <div class="modal__actions">
+                    <button type="button" class="admin-btn" id="modal-cancel">Отмена</button>
+                    <button type="submit" class="admin-btn admin-btn--primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal modal--hidden" id="user-bookings-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--wide">
+            <h3 class="modal__title" id="user-bookings-title">Бронирования</h3>
+            <div class="user-bookings-body">
+                <div class="user-bookings-block">
+                    <h4 class="user-bookings-block__title">Активные брони</h4>
+                    <div class="user-bookings-list" id="user-active-bookings"></div>
+                    <p class="user-bookings-empty" id="user-active-empty">Нет активных броней</p>
+                </div>
+                <div class="user-bookings-block">
+                    <h4 class="user-bookings-block__title">История бронирований</h4>
+                    <div class="user-bookings-list" id="user-history-bookings"></div>
+                    <p class="user-bookings-empty" id="user-history-empty">История пуста</p>
+                </div>
+            </div>
+            <div class="modal__actions">
+                <button type="button" class="admin-btn" id="user-bookings-close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal--hidden" id="tournament-matches-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--wide">
+            <h3 class="modal__title" id="tournament-matches-title">Матчи турнира</h3>
+            <p class="admin-section__sub" id="tournament-matches-event-name"></p>
+            <div class="tournament-matches-toolbar">
+                <span class="tournament-matches-toolbar__count">Матчей: <strong id="tournament-matches-count">0</strong></span>
+                <button type="button" class="admin-btn admin-btn--small" id="tournament-matches-add">+ Добавить матч</button>
+            </div>
+            <div class="tournament-matches-admin-wrap">
+                <table class="tournament-matches-admin-table" id="tournament-matches-table">
+                    <thead id="tournament-matches-thead">
+                        <tr>
+                            <th>Матч</th>
+                            <th>Участник 1 (email)</th>
+                            <th>Участник 2 (email)</th>
+                            <th>Счёт 1</th>
+                            <th>Счёт 2</th>
+                            <th class="tournament-matches-admin-table__th--narrow"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tournament-matches-tbody"></tbody>
+                </table>
+            </div>
+            <div class="modal__actions">
+                <button type="button" class="admin-btn" id="tournament-matches-close">Закрыть</button>
+                <button type="button" class="admin-btn admin-btn--primary" id="tournament-matches-save">Сохранить матчи</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal--hidden" id="tournament-rewards-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content modal__content--wide">
+            <h3 class="modal__title" id="tournament-rewards-title">Награды турнира</h3>
+            <p class="admin-section__sub" id="tournament-rewards-event-name"></p>
+            <div class="tournament-rewards-admin-wrap">
+                <table class="tournament-rewards-admin-table">
+                    <thead>
+                        <tr>
+                            <th>Место</th>
+                            <th>Награда (текст)</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tournament-rewards-tbody"></tbody>
+                </table>
+                <button type="button" class="admin-btn admin-btn--small" id="tournament-rewards-add-row">+ Добавить награду</button>
+            </div>
+            <div class="modal__actions">
+                <button type="button" class="admin-btn" id="tournament-rewards-close">Закрыть</button>
+                <button type="button" class="admin-btn admin-btn--primary" id="tournament-rewards-save">Сохранить награды</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal--hidden" id="give-coins-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content">
+            <h3 class="modal__title" id="give-coins-title">Выдать коины</h3>
+            <p class="give-coins-hint">Коины начисляются пользователям за участие в турнирах и за посещение бронирований компьютеров.</p>
+            <form class="modal__form" id="give-coins-form">
+                <div class="form-group">
+                    <label>Количество ARcoins</label>
+                    <input type="number" id="give-coins-amount" min="1" value="10" required>
+                </div>
+                <div class="modal__actions">
+                    <button type="button" class="admin-btn" id="give-coins-cancel">Отмена</button>
+                    <button type="submit" class="admin-btn admin-btn--primary">Выдать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="kiber-arena-data.js"></script>
+    <script src="kiber-arena-admin.js"></script>
+</body>
+</html>

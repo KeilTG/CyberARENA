@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="kiber-profile.css">
+    <title>Профиль — Кибер-арена</title>
+</head>
+<body>
+    <header class="profile-header">
+        <a href="../kiber-arena.html" class="profile-header__logo">
+            <img src="../forma-kiber/logo.png" alt="IT.МОСКВА">
+        </a>
+        <a href="../kiber-arena.html" class="profile-header__back">← На главную</a>
+    </header>
+
+    <main class="profile-main" id="profile-main">
+        <div class="profile-auth" id="profile-auth">
+            <p>Войдите или зарегистрируйтесь, чтобы просмотреть профиль.</p>
+            <a href="../forma-kiber/forma-signin.html" class="profile-btn">Войти</a>
+            <a href="../forma-kiber/forma-signup.html" class="profile-btn profile-btn--primary">Регистрация</a>
+        </div>
+
+        <div class="profile-content profile-content--hidden" id="profile-content">
+            <section class="profile-card profile-card--hero" id="profile-hero-card">
+                <div class="profile-hero">
+                    <div class="profile-avatar-wrap" id="profile-avatar-wrap">
+                        <div class="profile-avatar" id="profile-avatar"></div>
+                        <label class="profile-avatar-edit" for="avatar-input">
+                            <span>✎</span> Изменить фото
+                        </label>
+                        <input type="file" id="avatar-input" accept="image/*" class="profile-avatar-input">
+                    </div>
+                    <div class="profile-hero__info">
+                        <h1 class="profile-name" id="profile-fio">—</h1>
+                        <p class="profile-email" id="profile-email">—</p>
+                        <p class="profile-group" id="profile-group">—</p>
+                        <div class="profile-coins">
+                            <span class="profile-coins__icon">✦</span>
+                            <span class="profile-coins__value" id="profile-coins">0</span>
+                            <span class="profile-coins__label">ARcoins</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-card">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">✨</span>
+                    Кастомизация
+                </h2>
+                <p class="profile-customization-hint">Рамка аватарки и баннер приобретаются во вкладке <a href="../kiber-arena.html#exchange" id="profile-exchange-link">Обмен коинов</a> за ARcoins.</p>
+                <div class="profile-gif-banner-wrap profile-gif-banner-wrap--hidden" id="profile-gif-banner-wrap">
+                    <label class="profile-gif-banner-label">Баннер: GIF или видео MP4 (не более 5 сек)</label>
+                    <input type="url" class="profile-gif-banner-input" id="profile-banner-gif-url" placeholder="https://...gif или .mp4">
+                    <div class="profile-gif-banner-row">
+                        <button type="button" class="profile-gif-banner-save" id="profile-banner-gif-save">Сохранить ссылку</button>
+                    </div>
+                    <p class="profile-gif-banner-or">или</p>
+                    <label class="profile-gif-banner-file-label">
+                        <span class="profile-gif-banner-file-btn">Выбрать GIF или MP4 (до 5 сек)</span>
+                        <input type="file" id="profile-banner-gif-file" accept="image/gif,.gif,video/mp4,.mp4" class="profile-gif-banner-file-input">
+                    </label>
+                    <p class="profile-gif-banner-hint" id="profile-banner-gif-file-hint"></p>
+                </div>
+            </section>
+
+            <section class="profile-card">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">🏆</span>
+                    Мои достижения
+                </h2>
+                <div class="profile-achievements" id="profile-achievements-list"></div>
+            </section>
+
+            <section class="profile-card">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">📅</span>
+                    История бронирований
+                </h2>
+                <div class="profile-history" id="profile-history">
+                    <p class="profile-history__empty" id="profile-history-empty">История пуста</p>
+                    <div class="profile-history__list" id="profile-history-list"></div>
+                </div>
+            </section>
+
+            <div class="profile-logout-wrap">
+                <button type="button" class="profile-logout-btn" id="profile-logout">Выйти с аккаунта</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="../kiber-arena-data.js"></script>
+    <script src="kiber-profile.js"></script>
+</body>
+</html>
