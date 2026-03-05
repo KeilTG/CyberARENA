@@ -12,11 +12,11 @@ from contextlib import asynccontextmanager
 
 # PostgreSQL подключение
 DB_CONFIG = {
-    'user': 'postgres',
-    'password': '123321',
-    'database': 'cyberarena_db',
-    'host': 'localhost',
-    'port': 5432
+    'user': os.getenv('DB_USER', 'postgres'),
+    'password': os.getenv('DB_PASSWORD', '123321'),
+    'database': os.getenv('DB_NAME', 'cyberarena_db'),
+    'host': os.getenv('DB_HOST', 'localhost'),
+    'port': int(os.getenv('DB_PORT', '5432'))
 }
 
 class UserLogin(BaseModel):
@@ -888,4 +888,5 @@ if __name__ == "__main__":
     print("   • admin@cyberarena.ru / admin123 (админ)")
     print("   • user@test.ru / 123456 (обычный пользователь)")
     print("="*60)
+
     uvicorn.run(app, host="127.0.0.1", port=8000)
