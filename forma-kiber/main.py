@@ -7,16 +7,15 @@ from datetime import datetime
 import uvicorn
 import asyncpg
 import os
-import json
 from contextlib import asynccontextmanager
 
 # PostgreSQL подключение
 DB_CONFIG = {
-    'user': os.getenv('DB_USER', 'postgres'),
-    'password': os.getenv('DB_PASSWORD', '123321'),
-    'database': os.getenv('DB_NAME', 'cyberarena_db'),
-    'host': os.getenv('DB_HOST', 'localhost'),
-    'port': int(os.getenv('DB_PORT', '5432'))
+    'user': 'postgres',
+    'password': '123321',
+    'database': 'cyberarena_db',
+    'host': 'localhost',
+    'port': 5432
 }
 
 class UserLogin(BaseModel):
@@ -36,52 +35,27 @@ class GiveCoins(BaseModel):
 
 class PurchaseItem(BaseModel):
     email: str
-    item_type: str  # 'frame' | 'banner' | 'gif'
     item_id: str
+    item_type: str  # 'frame', 'banner', 'gif'
 
-class AchievementClaim(BaseModel):
-    email: str
-    achievement_id: str
-
-class TeamSync(BaseModel):
-    invite_token: str
+# Модели для новых таблиц
+class Tournament(BaseModel):
+    id: str = None
     name: str
-    owner_email: str
-    members: list
+    category: str
+    format: str
+    date: str
+    time: str
+    maxParticipants: int
+    description: str = ""
+    image: str = ""
 
-class TeamInviteCreate(BaseModel):
-    invite_token: str
-    invited_email: str
-    captain_email: str
-
-class TeamInvitationAccept(BaseModel):
-    invitation_id: int
+class Booking(BaseModel):
+    seat_id: int
     user_email: str
-
-class TeamInvitationDecline(BaseModel):
-    invitation_id: int
-    user_email: str
-
-class TeamLeave(BaseModel):
-    invite_token: str
-    user_email: str
-
-# Награды за достижения (ARcoins) — только те, у которых rewardCoins > 0
-ACHIEVEMENT_REWARDS = {
-    'first_booking': 5,
-    'five_bookings': 10,
-    'ten_bookings': 20,
-    'first_tournament': 5,
-    'three_tournaments': 15,
-    'collector': 10,
-}
-
-# Цены на рамки, баннеры и гифки (как в kiber-arena-data.js)
-PURCHASE_PRICES = {
-    'frame': {'frame-none': 0, 'frame-gold': 15, 'frame-neon': 25, 'frame-silver': 20, 'frame-rainbow': 35},
-    'banner': {'banner-none': 0, 'banner-blue': 20, 'banner-purple': 25, 'banner-fire': 30, 'banner-cyber': 40, 'banner-gif': 700},
-    'gif': {'gif-banner-1': 35, 'gif-banner-2': 45, 'gif-banner-3': 55, 'gif-banner-4': 65, 'gif-banner-5': 80, 'gif-banner-6': 100}
-}
+    user_name: str
+    date: str
+    time: str
 
 async def get_db():
     try:
@@ -98,7 +72,7 @@ async def lifespan(app: FastAPI):
     try:
         conn = await get_db()
         if conn:
-            # Создаем таблицу users если её нет
+            # Таблица users (существующая)
             await conn.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id SERIAL PRIMARY KEY,
@@ -114,20 +88,77 @@ async def lifespan(app: FastAPI):
             ''')
             print("✅ Таблица users проверена/создана")
             
-            # Проверяем и добавляем колонку is_admin если её нет
+            # === НОВАЯ ТАБЛИЦА: computers (компьютеры) ===
+            await conn.execute('''
+                CREATE TABLE IF NOT EXISTS computers (
+                    id SERIAL PRIMARY KEY,
+                    seat_number INTEGER UNIQUE NOT NULL,
+                    is_booked BOOLEAN DEFAULT FALSE,
+                    booked_by_email VARCHAR(255) REFERENCES users(email) ON DELETE SET NULL,
+                    booked_by_name VARCHAR(255),
+                    booking_date DATE,
+                    booking_time VARCHAR(50),
+                    booked_at TIMESTAMP,
+                    specs VARCHAR(255) DEFAULT 'Стандартная конфигурация'
+                )
+            ''')
+            print("✅ Таблица computers создана/проверена")
+            
+            # Заполняем компьютеры (36 мест), если таблица пустая
+            computers_count = await conn.fetchval("SELECT COUNT(*) FROM computers")
+            if computers_count == 0:
+                for i in range(1, 37):
+                    await conn.execute('''
+                        INSERT INTO computers (seat_number, is_booked, specs)
+                        VALUES ($1, $2, $3)
+                    ''', i, False, f'ПК-{i:02d}: RTX 3060, i5-12400F, 16GB RAM')
+                print("✅ Добавлено 36 компьютеров")
+            
+            # === НОВАЯ ТАБЛИЦА: tournaments (турниры) ===
+            await conn.execute('''
+                CREATE TABLE IF NOT EXISTS tournaments (
+                    id VARCHAR(50) PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    category VARCHAR(50) NOT NULL,
+                    format VARCHAR(10) NOT NULL,
+                    date VARCHAR(20) NOT NULL,
+                    time VARCHAR(20) NOT NULL,
+                    max_participants INTEGER DEFAULT 16,
+                    description TEXT,
+                    image_url TEXT,
+                    created_at TIMESTAMP DEFAULT NOW()
+                )
+            ''')
+            print("✅ Таблица tournaments создана/проверена")
+            
+            # Добавляем тестовые турниры, если таблица пустая
+            tournaments_count = await conn.fetchval("SELECT COUNT(*) FROM tournaments")
+            if tournaments_count == 0:
+                test_tournaments = [
+                    ('1', 'Турнир по CS2', 'CS2', '5v5', '2026-03-15', '18:00', 16, 'Командный турнир 5v5', ''),
+                    ('2', 'Лига Valorant', 'Valorant', '5v5', '2026-03-20', '17:00', 32, 'Турнир по Valorant', ''),
+                    ('3', 'Кубок Fortnite', 'Fortnite', '1v1', '2026-03-25', '19:00', 24, 'Одиночный турнир', '')
+                ]
+                for t in test_tournaments:
+                    await conn.execute('''
+                        INSERT INTO tournaments (id, name, category, format, date, time, max_participants, description, image_url)
+                        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                        ON CONFLICT (id) DO NOTHING
+                    ''', t[0], t[1], t[2], t[3], t[4], t[5], t[6], t[7], t[8])
+                print("✅ Добавлены тестовые турниры")
+            
+            # Проверяем и добавляем колонку is_admin
             try:
                 await conn.execute('''
                     ALTER TABLE users 
                     ADD COLUMN IF NOT EXISTS is_admin BOOLEAN DEFAULT FALSE
                 ''')
-                print("✅ Колонка is_admin проверена/добавлена")
             except Exception as e:
                 print(f"⚠️ Ошибка при добавлении колонки is_admin: {e}")
             
             # Проверяем, есть ли уже админ
             admin_exists = await conn.fetchval("SELECT COUNT(*) FROM users WHERE is_admin = TRUE")
             if admin_exists == 0:
-                # Создаем тестового админа
                 await conn.execute('''
                     INSERT INTO users (email, password, fio, group_name, role, arcoins, is_admin, registered_at)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
@@ -135,7 +166,7 @@ async def lifespan(app: FastAPI):
                 ''', 'admin@cyberarena.ru', 'admin123', 'Администратор', 'admin', 'admin', 1000, True, datetime.now())
                 print("✅ Создан тестовый администратор: admin@cyberarena.ru / admin123")
             
-            # Создаем тестового пользователя для проверки
+            # Создаем тестового пользователя
             user_exists = await conn.fetchval("SELECT COUNT(*) FROM users WHERE email = 'user@test.ru'")
             if user_exists == 0:
                 await conn.execute('''
@@ -143,43 +174,6 @@ async def lifespan(app: FastAPI):
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                 ''', 'user@test.ru', '123456', 'Тестовый Пользователь', '1И-1-25', 'player', 150, False, datetime.now())
                 print("✅ Создан тестовый пользователь: user@test.ru / 123456")
-            
-            # Таблица полученных наград за достижения (чтобы не выдавать дважды)
-            await conn.execute('''
-                CREATE TABLE IF NOT EXISTS user_achievement_rewards (
-                    id SERIAL PRIMARY KEY,
-                    email VARCHAR(255) NOT NULL,
-                    achievement_id VARCHAR(100) NOT NULL,
-                    claimed_at TIMESTAMP NOT NULL DEFAULT NOW(),
-                    CONSTRAINT uq_user_achievement UNIQUE (email, achievement_id)
-                )
-            ''')
-            print("✅ Таблица user_achievement_rewards проверена/создана")
-
-            # Таблица команд (для приглашений и синхронизации)
-            await conn.execute('''
-                CREATE TABLE IF NOT EXISTS teams (
-                    id SERIAL PRIMARY KEY,
-                    invite_token VARCHAR(64) UNIQUE NOT NULL,
-                    name VARCHAR(255) NOT NULL,
-                    owner_email VARCHAR(255) NOT NULL,
-                    members JSONB NOT NULL DEFAULT '[]'::jsonb,
-                    updated_at TIMESTAMP DEFAULT NOW()
-                )
-            ''')
-            print("✅ Таблица teams проверена/создана")
-
-            await conn.execute('''
-                CREATE TABLE IF NOT EXISTS team_invitations (
-                    id SERIAL PRIMARY KEY,
-                    team_id INTEGER NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-                    invited_email VARCHAR(255) NOT NULL,
-                    status VARCHAR(20) NOT NULL DEFAULT 'pending',
-                    created_at TIMESTAMP DEFAULT NOW(),
-                    UNIQUE(team_id, invited_email)
-                )
-            ''')
-            print("✅ Таблица team_invitations проверена/создана")
                 
     except Exception as e:
         print(f"❌ Ошибка при инициализации БД: {e}")
@@ -209,36 +203,33 @@ print(f"📁 Родительская папка (CyberARENA/): {parent_dir}")
 # ===== 1. СНАЧАЛА ВСЕ API ЭНДПОИНТЫ =====
 @app.get("/api/health")
 async def health():
-    """Проверка работы API"""
     return {"status": "ok", "message": "API работает"}
 
 @app.get("/api/test-db")
 async def test_db():
-    """Тест подключения к базе данных"""
     conn = None
     try:
         conn = await get_db()
         if not conn:
             return JSONResponse(
                 status_code=500,
-                content={"status": "error", "connected": False, "error": "Не удалось подключиться к БД"}
+                content={"status": "error", "connected": False}
             )
         
         version = await conn.fetchval("SELECT version()")
-        table_exists = await conn.fetchval("""
-            SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'users')
-        """)
-        count = await conn.fetchval("SELECT COUNT(*) FROM users") if table_exists else 0
+        users_count = await conn.fetchval("SELECT COUNT(*) FROM users")
+        computers_count = await conn.fetchval("SELECT COUNT(*) FROM computers")
+        tournaments_count = await conn.fetchval("SELECT COUNT(*) FROM tournaments")
         await conn.close()
         
         return JSONResponse(
             status_code=200,
             content={
                 "status": "ok",
-                "database": "cyberarena_db",
                 "connected": True,
-                "table_exists": table_exists,
-                "users_count": count
+                "users_count": users_count,
+                "computers_count": computers_count,
+                "tournaments_count": tournaments_count
             }
         )
     except Exception as e:
@@ -249,10 +240,9 @@ async def test_db():
             content={"status": "error", "connected": False, "error": str(e)}
         )
 
+# ===== API ДЛЯ ЛИДЕРБОРДА =====
 @app.get("/api/leaderboard")
 async def get_leaderboard():
-    """Получение данных для лидерборда"""
-    print("📊 Запрос лидерборда")
     conn = None
     try:
         conn = await get_db()
@@ -262,7 +252,6 @@ async def get_leaderboard():
                 content={"detail": "Ошибка подключения к базе данных"}
             )
         
-        # Получаем всех пользователей, сортируем по arcoins
         users = await conn.fetch('''
             SELECT fio, group_name, arcoins 
             FROM users 
@@ -271,7 +260,6 @@ async def get_leaderboard():
         
         await conn.close()
         
-        # Формируем данные для лидерборда с местами
         leaderboard = []
         for i, user in enumerate(users, 1):
             leaderboard.append({
@@ -281,7 +269,6 @@ async def get_leaderboard():
                 'arcoins': user['arcoins']
             })
         
-        print(f"✅ Отправлено {len(leaderboard)} записей")
         return JSONResponse(content=leaderboard)
         
     except Exception as e:
@@ -293,252 +280,320 @@ async def get_leaderboard():
             content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
         )
 
-# ===== ПОИСК ПОЛЬЗОВАТЕЛЕЙ (для приглашений в команду) =====
-@app.get("/api/users/search")
-async def search_users(q: str = ""):
-    """Поиск зарегистрированных пользователей по ФИО или email. Возвращает email и fio."""
-    q = (q or "").strip()
-    if len(q) < 2:
-        return JSONResponse(content=[])
+# ===== НОВЫЙ API ДЛЯ КОМПЬЮТЕРОВ =====
+@app.get("/api/computers")
+async def get_computers():
+    """Получить статус всех компьютеров"""
     conn = None
     try:
         conn = await get_db()
         if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к базе данных"})
-        pattern = "%" + q + "%"
-        users = await conn.fetch("""
-            SELECT email, fio FROM users
-            WHERE fio ILIKE $1 OR email ILIKE $1
-            ORDER BY fio NULLS LAST, email
-            LIMIT 20
-        """, pattern)
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Ошибка подключения к базе данных"}
+            )
+        
+        computers = await conn.fetch('''
+            SELECT * FROM computers ORDER BY seat_number
+        ''')
+        
         await conn.close()
-        result = [{"email": u["email"], "fio": u["fio"] or ""} for u in users]
-        return JSONResponse(content=result)
-    except Exception as e:
-        print(f"❌ Ошибка поиска пользователей: {e}")
-        if conn:
-            await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-# ===== КОМАНДЫ И ПРИГЛАШЕНИЯ =====
-@app.post("/api/teams/sync")
-async def sync_team(data: TeamSync):
-    """Создать или обновить команду в БД (вызывается при создании/изменении команды)."""
-    conn = None
-    try:
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        members = data.members if isinstance(data.members, list) else []
-        await conn.execute("""
-            INSERT INTO teams (invite_token, name, owner_email, members, updated_at)
-            VALUES ($1, $2, $3, $4::jsonb, NOW())
-            ON CONFLICT (invite_token) DO UPDATE SET
-                name = EXCLUDED.name,
-                owner_email = EXCLUDED.owner_email,
-                members = EXCLUDED.members,
-                updated_at = NOW()
-        """, data.invite_token, data.name, data.owner_email, json.dumps(members))
-        await conn.close()
-        return JSONResponse(content={"ok": True})
-    except Exception as e:
-        if conn:
-            await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-@app.get("/api/teams")
-async def get_my_teams(email: str = ""):
-    """Получить команды, в которых пользователь состоит."""
-    if not email:
-        return JSONResponse(content=[])
-    conn = None
-    try:
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        rows = await conn.fetch("""
-            SELECT id, invite_token, name, owner_email, members
-            FROM teams
-            WHERE members @> $1::jsonb
-            ORDER BY updated_at DESC
-        """, json.dumps([email]))
-        await conn.close()
+        
         result = []
-        for r in rows:
+        for c in computers:
             result.append({
-                "id": r["id"],
-                "invite_token": r["invite_token"],
-                "name": r["name"],
-                "owner_email": r["owner_email"],
-                "members": r["members"] if isinstance(r["members"], list) else (r["members"] or [])
+                'id': c['id'],
+                'seat_number': c['seat_number'],
+                'is_booked': c['is_booked'],
+                'booked_by_email': c['booked_by_email'],
+                'booked_by_name': c['booked_by_name'],
+                'booking_date': c['booking_date'],
+                'booking_time': c['booking_time'],
+                'specs': c['specs']
             })
+        
         return JSONResponse(content=result)
+        
     except Exception as e:
+        print(f"❌ Ошибка получения компьютеров: {e}")
         if conn:
             await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-@app.post("/api/teams/leave")
-async def leave_team_api(data: TeamLeave):
-    """Выйти из команды: удалить пользователя из members в БД."""
-    conn = None
-    try:
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        team = await conn.fetchrow("SELECT id, owner_email, members FROM teams WHERE invite_token = $1", data.invite_token)
-        if not team:
-            await conn.close()
-            return JSONResponse(status_code=404, content={"detail": "Команда не найдена"})
-        members = list(team["members"]) if isinstance(team["members"], list) else list(team["members"] or [])
-        if data.user_email not in members:
-            await conn.close()
-            return JSONResponse(content={"ok": True})
-        members = [m for m in members if m != data.user_email]
-        await conn.execute("UPDATE teams SET members = $1::jsonb, updated_at = NOW() WHERE id = $2", json.dumps(members), team["id"])
-        await conn.close()
-        return JSONResponse(content={"ok": True})
-    except Exception as e:
-        if conn:
-            await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-@app.post("/api/team-invitations")
-async def create_team_invitation(data: TeamInviteCreate):
-    """Отправить приглашение в команду."""
-    conn = None
-    try:
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        team = await conn.fetchrow("SELECT id, owner_email, members FROM teams WHERE invite_token = $1", data.invite_token)
-        if not team:
-            await conn.close()
-            return JSONResponse(status_code=404, content={"detail": "Команда не найдена. Сначала создайте команду и синхронизируйте её."})
-        if team["owner_email"] != data.captain_email:
-            await conn.close()
-            return JSONResponse(status_code=403, content={"detail": "Только капитан может приглашать"})
-        members = team["members"] if isinstance(team["members"], list) else (team["members"] or [])
-        if data.invited_email in members:
-            await conn.close()
-            return JSONResponse(content={"ok": True, "message": "Уже в команде"})
-        await conn.execute("""
-            INSERT INTO team_invitations (team_id, invited_email, status)
-            VALUES ($1, $2, 'pending')
-            ON CONFLICT (team_id, invited_email) DO UPDATE SET status = 'pending', created_at = NOW()
-        """, team["id"], data.invited_email)
-        await conn.close()
-        return JSONResponse(content={"ok": True, "message": "Приглашение отправлено"})
-    except Exception as e:
-        if conn:
-            await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-@app.get("/api/team-invitations")
-async def get_my_invitations(email: str = ""):
-    """Получить входящие приглашения в команды (название команды + список участников)."""
-    if not email:
-        return JSONResponse(content=[])
-    conn = None
-    try:
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        rows = await conn.fetch("""
-            SELECT ti.id, ti.team_id, ti.invited_email, ti.created_at,
-                   t.name as team_name, t.owner_email, t.members, t.invite_token
-            FROM team_invitations ti
-            JOIN teams t ON t.id = ti.team_id
-            WHERE ti.invited_email = $1 AND ti.status = 'pending'
-            ORDER BY ti.created_at DESC
-        """, email)
-        result = []
-        for r in rows:
-            members = r["members"] if isinstance(r["members"], list) else (r["members"] or [])
-            result.append({
-                "id": r["id"],
-                "team_id": r["team_id"],
-                "team_name": r["team_name"],
-                "owner_email": r["owner_email"],
-                "members": members,
-                "invite_token": r["invite_token"],
-                "created_at": r["created_at"].isoformat() if r["created_at"] else None
-            })
-        await conn.close()
-        return JSONResponse(content=result)
-    except Exception as e:
-        if conn:
-            await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
-
-@app.post("/api/team-invitations/accept")
-async def accept_team_invitation(data: TeamInvitationAccept):
-    """Принять приглашение: добавить пользователя в команду в БД и вернуть команду."""
-    conn = None
-    try:
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        inv = await conn.fetchrow(
-            "SELECT id, team_id FROM team_invitations WHERE id = $1 AND invited_email = $2 AND status = 'pending'",
-            data.invitation_id, data.user_email
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
         )
-        if not inv:
+
+@app.post("/api/computers/{seat_id}/book")
+async def book_computer(seat_id: int, booking: Booking):
+    """Забронировать компьютер"""
+    conn = None
+    try:
+        conn = await get_db()
+        if not conn:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Ошибка подключения к базе данных"}
+            )
+        
+        # Проверяем, свободен ли компьютер
+        computer = await conn.fetchrow(
+            "SELECT * FROM computers WHERE seat_number = $1",
+            seat_id
+        )
+        
+        if not computer:
             await conn.close()
-            return JSONResponse(status_code=404, content={"detail": "Приглашение не найдено или уже обработано"})
-        team = await conn.fetchrow("SELECT id, invite_token, name, owner_email, members FROM teams WHERE id = $1", inv["team_id"])
-        if not team:
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "Компьютер не найден"}
+            )
+        
+        if computer['is_booked']:
             await conn.close()
-            return JSONResponse(status_code=404, content={"detail": "Команда не найдена"})
-        members = list(team["members"]) if isinstance(team["members"], list) else list(team["members"] or [])
-        if data.user_email in members:
-            await conn.execute("UPDATE team_invitations SET status = 'accepted' WHERE id = $1", data.invitation_id)
-            await conn.close()
-            return JSONResponse(content={"ok": True, "team": {"invite_token": team["invite_token"], "name": team["name"], "owner_email": team["owner_email"], "members": members}})
-        members.append(data.user_email)
-        await conn.execute("UPDATE teams SET members = $1::jsonb, updated_at = NOW() WHERE id = $2", json.dumps(members), team["id"])
-        await conn.execute("UPDATE team_invitations SET status = 'accepted' WHERE id = $1", data.invitation_id)
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "Компьютер уже занят"}
+            )
+        
+        # Бронируем
+        await conn.execute('''
+            UPDATE computers 
+            SET is_booked = TRUE,
+                booked_by_email = $1,
+                booked_by_name = $2,
+                booking_date = $3,
+                booking_time = $4,
+                booked_at = $5
+            WHERE seat_number = $6
+        ''', booking.user_email, booking.user_name, booking.date, booking.time, 
+            datetime.now(), seat_id)
+        
         await conn.close()
+        
         return JSONResponse(content={
-            "ok": True,
-            "team": {
-                "id": team["id"],
-                "invite_token": team["invite_token"],
-                "name": team["name"],
-                "owner_email": team["owner_email"],
-                "members": members
-            }
+            "status": "ok",
+            "message": f"Компьютер {seat_id} забронирован"
+        })
+        
+    except Exception as e:
+        print(f"❌ Ошибка бронирования: {e}")
+        if conn:
+            await conn.close()
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
+        )
+
+@app.delete("/api/computers/{seat_id}/unbook")
+async def unbook_computer(seat_id: int, email: str):
+    """Отменить бронирование"""
+    conn = None
+    try:
+        conn = await get_db()
+        if not conn:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Ошибка подключения к базе данных"}
+            )
+        
+        computer = await conn.fetchrow(
+            "SELECT * FROM computers WHERE seat_number = $1",
+            seat_id
+        )
+        
+        if not computer:
+            await conn.close()
+            return JSONResponse(
+                status_code=404,
+                content={"detail": "Компьютер не найден"}
+            )
+        
+        if not computer['is_booked']:
+            await conn.close()
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "Компьютер не забронирован"}
+            )
+        
+        if computer['booked_by_email'] != email:
+            await conn.close()
+            return JSONResponse(
+                status_code=403,
+                content={"detail": "Вы не можете отменить чужую бронь"}
+            )
+        
+        await conn.execute('''
+            UPDATE computers 
+            SET is_booked = FALSE,
+                booked_by_email = NULL,
+                booked_by_name = NULL,
+                booking_date = NULL,
+                booking_time = NULL,
+                booked_at = NULL
+            WHERE seat_number = $1
+        ''', seat_id)
+        
+        await conn.close()
+        
+        return JSONResponse(content={
+            "status": "ok",
+            "message": f"Бронь компьютера {seat_id} отменена"
+        })
+        
+    except Exception as e:
+        print(f"❌ Ошибка отмены брони: {e}")
+        if conn:
+            await conn.close()
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
+        )
+
+# ===== НОВЫЙ API ДЛЯ ТУРНИРОВ =====
+@app.get("/api/tournaments")
+async def get_tournaments():
+    """Получить все турниры"""
+    conn = None
+    try:
+        conn = await get_db()
+        if not conn:
+            return JSONResponse(
+                status_code=500,
+                content={"detail": "Ошибка подключения к базе данных"}
+            )
+        
+        tournaments = await conn.fetch('''
+            SELECT * FROM tournaments ORDER BY date, time
+        ''')
+        
+        await conn.close()
+        
+        result = []
+        for t in tournaments:
+            result.append({
+                'id': t['id'],
+                'name': t['name'],
+                'category': t['category'],
+                'format': t['format'],
+                'date': t['date'],
+                'time': t['time'],
+                'maxParticipants': t['max_participants'],
+                'description': t['description'] or '',
+                'image': t['image_url'] or ''
+            })
+        
+        return JSONResponse(content=result)
+        
+    except Exception as e:
+        print(f"❌ Ошибка получения турниров: {e}")
+        if conn:
+            await conn.close()
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
+        )
+
+@app.post("/api/tournaments")
+async def create_tournament(tournament: Tournament):
+    """Создать новый турнир"""
+    conn = None
+    try:
+        conn = await get_db()
+        if not conn:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Ошибка подключения к БД"}
+            )
+        
+        from datetime import datetime
+        new_id = str(int(datetime.now().timestamp()))
+        
+        await conn.execute('''
+            INSERT INTO tournaments (id, name, category, format, date, time, 
+                                     max_participants, description, image_url)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ''', new_id, tournament.name, tournament.category, tournament.format,
+            tournament.date, tournament.time, tournament.maxParticipants,
+            tournament.description, tournament.image)
+        
+        await conn.close()
+        
+        return JSONResponse(content={
+            "status": "ok",
+            "id": new_id,
+            "message": "Турнир создан"
         })
     except Exception as e:
+        print(f"❌ Ошибка создания турнира: {e}")
         if conn:
             await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
 
-@app.post("/api/team-invitations/decline")
-async def decline_team_invitation(data: TeamInvitationDecline):
-    """Отклонить приглашение."""
+@app.put("/api/tournaments/{tournament_id}")
+async def update_tournament(tournament_id: str, tournament: Tournament):
+    """Обновить турнир"""
     conn = None
     try:
         conn = await get_db()
         if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-        await conn.execute(
-            "UPDATE team_invitations SET status = 'declined' WHERE id = $1 AND invited_email = $2",
-            data.invitation_id, data.user_email
-        )
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Ошибка подключения к БД"}
+            )
+        
+        await conn.execute('''
+            UPDATE tournaments 
+            SET name = $1, category = $2, format = $3, date = $4, 
+                time = $5, max_participants = $6, description = $7, image_url = $8
+            WHERE id = $9
+        ''', tournament.name, tournament.category, tournament.format,
+            tournament.date, tournament.time, tournament.maxParticipants,
+            tournament.description, tournament.image, tournament_id)
+        
         await conn.close()
-        return JSONResponse(content={"ok": True})
+        
+        return JSONResponse(content={
+            "status": "ok", 
+            "message": "Турнир обновлён"
+        })
     except Exception as e:
+        print(f"❌ Ошибка обновления турнира: {e}")
         if conn:
             await conn.close()
-        return JSONResponse(status_code=500, content={"detail": str(e)})
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+@app.delete("/api/tournaments/{tournament_id}")
+async def delete_tournament(tournament_id: str):
+    """Удалить турнир"""
+    conn = None
+    try:
+        conn = await get_db()
+        if not conn:
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Ошибка подключения к БД"}
+            )
+        
+        await conn.execute('DELETE FROM tournaments WHERE id = $1', tournament_id)
+        
+        await conn.close()
+        
+        return JSONResponse(content={
+            "status": "ok", 
+            "message": "Турнир удалён"
+        })
+    except Exception as e:
+        print(f"❌ Ошибка удаления турнира: {e}")
+        if conn:
+            await conn.close()
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 # ===== АДМИНСКИЕ API =====
 @app.get("/api/admin/users")
 async def get_all_users():
-    """Получение всех пользователей для админки"""
-    print("👥 Запрос списка пользователей (админ)")
     conn = None
     try:
         conn = await get_db()
@@ -569,7 +624,6 @@ async def get_all_users():
                 'registered_at': user['registered_at'].isoformat() if user['registered_at'] else None
             })
         
-        print(f"✅ Отправлено {len(result)} пользователей")
         return JSONResponse(content=result)
         
     except Exception as e:
@@ -583,8 +637,6 @@ async def get_all_users():
 
 @app.post("/api/admin/give-coins")
 async def give_coins(data: GiveCoins):
-    """Выдать или забрать коины (amount > 0 — выдать, amount < 0 — списать). Баланс не уходит ниже 0."""
-    print(f"💰 Коины: {data.email} {data.amount:+d}")
     conn = None
     try:
         conn = await get_db()
@@ -606,19 +658,23 @@ async def give_coins(data: GiveCoins):
                 content={"detail": "Пользователь не найден"}
             )
         
-        current = user['arcoins'] or 0
-        new_balance = max(0, current + data.amount)
-        await conn.execute(
-            "UPDATE users SET arcoins = $1 WHERE email = $2",
-            new_balance, data.email
+        await conn.execute('''
+            UPDATE users 
+            SET arcoins = arcoins + $1 
+            WHERE email = $2
+        ''', data.amount, data.email)
+        
+        new_balance = await conn.fetchval(
+            "SELECT arcoins FROM users WHERE email = $1", 
+            data.email
         )
         
         await conn.close()
-        msg = "Коины успешно выданы" if data.amount > 0 else "Коины списаны" if data.amount < 0 else "Без изменений"
+        
         return JSONResponse(
             status_code=200,
             content={
-                "message": msg,
+                "message": "Коины успешно выданы",
                 "email": data.email,
                 "new_balance": new_balance
             }
@@ -633,6 +689,128 @@ async def give_coins(data: GiveCoins):
             content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
         )
 
+# ===== API ДЛЯ ПОКУПОК =====
+@app.post("/api/purchase")
+async def purchase_item(data: PurchaseItem):
+    conn = None
+    try:
+        conn = await get_db()
+        if not conn:
+            return JSONResponse(
+                status_code=500,
+                content={"success": False, "detail": "Ошибка подключения к базе данных"}
+            )
+        
+        user = await conn.fetchrow(
+            "SELECT id, arcoins FROM users WHERE email = $1", 
+            data.email
+        )
+        
+        if not user:
+            await conn.close()
+            return JSONResponse(
+                status_code=404,
+                content={"success": False, "detail": "Пользователь не найден"}
+            )
+        
+        price = 0
+        item_name = ""
+        
+        if data.item_type == 'frame':
+            frames = [
+                {'id': 'frame-none', 'price': 0, 'name': 'Без рамки'},
+                {'id': 'frame-gold', 'price': 15, 'name': 'Золотая рамка'},
+                {'id': 'frame-neon', 'price': 25, 'name': 'Неоновая рамка'},
+                {'id': 'frame-silver', 'price': 20, 'name': 'Серебряная рамка'},
+                {'id': 'frame-rainbow', 'price': 35, 'name': 'Радужная рамка'}
+            ]
+            for f in frames:
+                if f['id'] == data.item_id:
+                    price = f['price']
+                    item_name = f['name']
+                    break
+        
+        elif data.item_type == 'banner':
+            banners = [
+                {'id': 'banner-none', 'price': 0, 'name': 'Без баннера'},
+                {'id': 'banner-blue', 'price': 20, 'name': 'Синий градиент'},
+                {'id': 'banner-purple', 'price': 25, 'name': 'Фиолетовый градиент'},
+                {'id': 'banner-fire', 'price': 30, 'name': 'Огненный градиент'},
+                {'id': 'banner-cyber', 'price': 40, 'name': 'Кибер-сетка'}
+            ]
+            for b in banners:
+                if b['id'] == data.item_id:
+                    price = b['price']
+                    item_name = b['name']
+                    break
+        
+        elif data.item_type == 'gif':
+            gifs = [
+                {'id': 'gif-banner-1', 'price': 35, 'name': 'Кибер-неон'},
+                {'id': 'gif-banner-2', 'price': 45, 'name': 'Огонь'},
+                {'id': 'gif-banner-3', 'price': 55, 'name': 'Звёзды'},
+                {'id': 'gif-banner-4', 'price': 65, 'name': 'Волны'},
+                {'id': 'gif-banner-5', 'price': 80, 'name': 'Геометрия'},
+                {'id': 'gif-banner-6', 'price': 100, 'name': 'Космос'}
+            ]
+            for g in gifs:
+                if g['id'] == data.item_id:
+                    price = g['price']
+                    item_name = g['name']
+                    break
+        
+        if price == 0 and data.item_id not in ['frame-none', 'banner-none']:
+            await conn.close()
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "detail": "Предмет не найден"}
+            )
+        
+        if user['arcoins'] < price:
+            await conn.close()
+            return JSONResponse(
+                status_code=400,
+                content={"success": False, "detail": "Недостаточно коинов"}
+            )
+        
+        await conn.execute('''
+            UPDATE users 
+            SET arcoins = arcoins - $1 
+            WHERE email = $2
+        ''', price, data.email)
+        
+        new_balance = await conn.fetchval(
+            "SELECT arcoins FROM users WHERE email = $1", 
+            data.email
+        )
+        
+        await conn.close()
+        
+        print(f"✅ Покупка успешна: {data.email} купил {item_name} за {price} ARcoins")
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "success": True,
+                "message": f"Предмет успешно куплен",
+                "new_balance": new_balance,
+                "item": {
+                    "id": data.item_id,
+                    "name": item_name,
+                    "type": data.item_type
+                }
+            }
+        )
+        
+    except Exception as e:
+        print(f"❌ Ошибка покупки: {e}")
+        if conn:
+            await conn.close()
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "detail": f"Внутренняя ошибка сервера: {str(e)}"}
+        )
+
 @app.post("/api/register")
 async def register(user: UserRegister):
     print(f"📝 Получен запрос на регистрацию: {user.email}")
@@ -645,7 +823,6 @@ async def register(user: UserRegister):
                 content={"detail": "Ошибка подключения к базе данных"}
             )
         
-        # Проверяем, есть ли уже такой email
         existing = await conn.fetchrow(
             "SELECT email FROM users WHERE email = $1", 
             user.email
@@ -748,112 +925,7 @@ async def login(user: UserLogin):
             content={"detail": f"Внутренняя ошибка сервера: {str(e)}"}
         )
 
-@app.post("/api/purchase")
-async def purchase_item(data: PurchaseItem):
-    """Покупка рамки/баннера/гифки за коины. Списывает arcoins и возвращает новый баланс."""
-    print(f"🛒 Покупка: {data.email} | {data.item_type} | {data.item_id}")
-    conn = None
-    try:
-        prices = PURCHASE_PRICES.get(data.item_type)
-        if not prices:
-            return JSONResponse(status_code=400, content={"detail": "Неизвестный тип товара"})
-        price = prices.get(data.item_id)
-        if price is None:
-            return JSONResponse(status_code=400, content={"detail": "Неизвестный товар"})
-        if price == 0:
-            return JSONResponse(status_code=400, content={"detail": "Этот предмет бесплатный"})
-
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-
-        user = await conn.fetchrow(
-            "SELECT id, arcoins FROM users WHERE email = $1", data.email
-        )
-        if not user:
-            await conn.close()
-            return JSONResponse(status_code=404, content={"detail": "Пользователь не найден"})
-
-        current_coins = user['arcoins'] or 0
-        if current_coins < price:
-            await conn.close()
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "Недостаточно коинов", "required": price, "current": current_coins}
-            )
-
-        new_balance = current_coins - price
-        await conn.execute(
-            "UPDATE users SET arcoins = $1 WHERE email = $2", new_balance, data.email
-        )
-        await conn.close()
-
-        print(f"✅ Покупка успешна: {data.email}, новый баланс {new_balance}")
-        return JSONResponse(
-            status_code=200,
-            content={"success": True, "new_balance": new_balance, "message": "Покупка совершена"}
-        )
-    except Exception as e:
-        print(f"❌ Ошибка покупки: {e}")
-        if conn:
-            await conn.close()
-        return JSONResponse(
-            status_code=500,
-            content={"detail": str(e)}
-        )
-
-@app.post("/api/achievement-claim")
-async def achievement_claim(data: AchievementClaim):
-    """Получить награду за достижение. Начисляет ARcoins и помечает награду как полученную."""
-    print(f"🏆 Запрос награды: {data.email} | {data.achievement_id}")
-    conn = None
-    try:
-        reward = ACHIEVEMENT_REWARDS.get(data.achievement_id)
-        if reward is None or reward <= 0:
-            return JSONResponse(status_code=400, content={"detail": "У этого достижения нет награды или неизвестный ID"})
-
-        conn = await get_db()
-        if not conn:
-            return JSONResponse(status_code=500, content={"detail": "Ошибка подключения к БД"})
-
-        # Уже получал?
-        already = await conn.fetchrow(
-            "SELECT id FROM user_achievement_rewards WHERE email = $1 AND achievement_id = $2",
-            data.email, data.achievement_id
-        )
-        if already:
-            await conn.close()
-            return JSONResponse(status_code=400, content={"detail": "Награда уже получена"})
-
-        user = await conn.fetchrow("SELECT id, arcoins FROM users WHERE email = $1", data.email)
-        if not user:
-            await conn.close()
-            return JSONResponse(status_code=404, content={"detail": "Пользователь не найден"})
-
-        new_balance = (user['arcoins'] or 0) + reward
-        await conn.execute("UPDATE users SET arcoins = $1 WHERE email = $2", new_balance, data.email)
-        await conn.execute(
-            "INSERT INTO user_achievement_rewards (email, achievement_id, claimed_at) VALUES ($1, $2, NOW())",
-            data.email, data.achievement_id
-        )
-        await conn.close()
-
-        print(f"✅ Награда выдана: {data.email}, +{reward} ARcoins, баланс {new_balance}")
-        return JSONResponse(
-            status_code=200,
-            content={"success": True, "new_balance": new_balance, "reward": reward, "message": f"+{reward} ARcoins"}
-        )
-    except Exception as e:
-        print(f"❌ Ошибка выдачи награды: {e}")
-        if conn:
-            await conn.close()
-        return JSONResponse(
-            status_code=500,
-            content={"detail": str(e)}
-        )
-
 # ===== 2. ПОТОМ СТАТИЧЕСКИЕ ФАЙЛЫ =====
-# Раздаем файлы из родительской папки (CyberARENA/) по корневому пути /
 try:
     app.mount("/", StaticFiles(directory=parent_dir, html=True), name="root")
     print(f"✅ Статические файлы из {parent_dir} доступны по /")
@@ -874,19 +946,20 @@ if __name__ == "__main__":
     print("   • http://localhost:8000/forma-kiber/forma-signin.html")
     print("="*60)
     print("🔧 API эндпоинты:")
-    print("   • http://localhost:8000/api/health")
-    print("   • http://localhost:8000/api/test-db")
-    print("   • http://localhost:8000/api/leaderboard")
-    print("   • http://localhost:8000/api/users/search (GET, ?q=...)")
-    print("   • http://localhost:8000/api/teams/sync (POST)")
-    print("   • http://localhost:8000/api/teams (GET, ?email=...)")
-    print("   • http://localhost:8000/api/team-invitations (GET/POST)")
-    print("   • http://localhost:8000/api/admin/users")
-    print("   • http://localhost:8000/api/admin/give-coins (POST)")
+    print("   • /api/health")
+    print("   • /api/test-db")
+    print("   • /api/leaderboard")
+    print("   • /api/computers (GET)")
+    print("   • /api/computers/{id}/book (POST)")
+    print("   • /api/computers/{id}/unbook (DELETE)")
+    print("   • /api/tournaments (GET, POST)")
+    print("   • /api/tournaments/{id} (PUT, DELETE)")
+    print("   • /api/admin/users")
+    print("   • /api/admin/give-coins (POST)")
+    print("   • /api/purchase (POST)")
     print("="*60)
     print("👤 Тестовые аккаунты:")
     print("   • admin@cyberarena.ru / admin123 (админ)")
     print("   • user@test.ru / 123456 (обычный пользователь)")
     print("="*60)
-
     uvicorn.run(app, host="127.0.0.1", port=8000)
