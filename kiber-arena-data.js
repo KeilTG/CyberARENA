@@ -1,6 +1,26 @@
 /* Хранилище данных — localStorage */
 
+// Для совместимости с localStorage
 const STORAGE_KEYS = {
+  events: 'kiber_arena_events',
+  leaderboard: 'kiber_arena_leaderboard',
+  bookings: 'kiber_arena_bookings',
+  bookingHistory: 'kiber_arena_booking_history',
+  bookingScheme: 'kiber_arena_booking_scheme',
+  users: 'kiber_arena_users',
+  currentUser: 'kiber_arena_current_user',
+  userCustomization: 'kiber_arena_user_customization',
+  customizationFrames: 'kiber_arena_customization_frames',
+  customizationBanners: 'kiber_arena_customization_banners',
+  tournamentRegistrations: 'kiber_arena_tournament_registrations',
+  tournamentMatches: 'kiber_arena_tournament_matches',
+  tournamentResults: 'kiber_arena_tournament_results',
+  userAchievements: 'kiber_arena_user_achievements',
+  activityLog: 'kiber_arena_activity_log',
+  noShows: 'kiber_arena_no_shows'
+};
+const STORAGE_KEYS = {
+  
   events: 'kiber_arena_events',
   leaderboard: 'kiber_arena_leaderboard',
   bookings: 'kiber_arena_bookings',
