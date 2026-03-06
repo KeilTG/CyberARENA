@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="kiber-arena.css">
+    <title>Кибер-арена</title>
+</head>
+<body>
+
+    <!-- ========== Шапка: логотип, навигация, зона пользователя / регистрация ========== -->
+    <header class="header">
+        <a href="kiber-arena.html" class="header__logo">
+            <img src="forma-kiber/logo.png" alt="Московское образование. IT.МОСКВА">
+        </a>
+        <button type="button" class="header__burger" id="header-burger" aria-label="Меню" aria-expanded="false">
+            <span class="header__burger-line"></span>
+            <span class="header__burger-line"></span>
+            <span class="header__burger-line"></span>
+        </button>
+        <nav class="header__nav" id="header-nav">
+            <a href="#" class="header__link" id="nav-main">Главная</a>
+            <a href="#" class="header__link" id="nav-booking">Бронирование</a>
+            <a href="#" class="header__link" id="nav-tournaments">Турниры</a>
+            <a href="#" class="header__link" id="nav-leaderboard">Лидерборд</a>
+            <a href="#" class="header__link" id="nav-achievements">Мои достижения</a>
+            <a href="#" class="header__link" id="nav-exchange">Обмен коинов</a>
+        </nav>
+        <div class="header__user-area" id="header-user-area">
+            <a href="forma-kiber/forma-signup.html" class="header__btn" id="header-register-btn">Зарегистрироваться</a>
+        </div>
+    </header>
+
+    <!-- ========== Приветственная карточка (выбор раздела) ========== -->
+    <section class="welcome-card" id="welcome-content">
+        <div class="welcome-card__inner">
+            <span class="welcome-card__icon">↑</span>
+            <h2 class="welcome-card__title">Выберите раздел</h2>
+            <p class="welcome-card__text">Перейдите в интересующий вас раздел в меню выше</p>
+        </div>
+    </section>
+
+    <!-- ========== Главная: описание арены, возможности, правила, экономика ========== -->
+    <main class="main main--hidden" id="main-content">
+        <!-- Блок: что такое Кибер-арена -->
+        <section class="block">
+            <h2 class="block__title">
+                <span class="block__icon">✦</span>
+                Что такое Кибер-арена?
+            </h2>
+            <p class="block__text">
+                Кибер-арена — это современная площадка для киберспортивных соревнований и тренировок. 
+                Здесь вы можете развивать навыки в любимых играх, участвовать в турнирах и находить 
+                единомышленников в киберспортивном сообществе.
+            </p>
+        </section>
+        <!-- Блок: что в себя включает арена, расположение -->
+        <section class="block">
+            <h2 class="block__title">
+                <span class="block__icon">✦</span>
+                Что в себя включает Кибер-арена?
+            </h2>
+            <p class="block__text">
+                В арене установлены мощные игровые компьютеры с современным оборудованием: 
+                высокопроизводительные видеокарты, мониторы с высокой частотой обновления и 
+                профессиональная игровая периферия. Все станции оснащены для комфортной игры в 
+                популярные киберспортивные дисциплины.
+            </p>
+            <p class="block__text">
+                <strong>Расположение:</strong> Кибер-арена находится в Москве, на улице Ак.Миллионщикова дом 20 
+                IT.МОСКВА, кабинет: 404.
+            </p>
+        </section>
+        <!-- Блок: правила, возможности, экономика и валюта -->
+        <section class="block">
+            <h2 class="block__title">
+                <span class="block__icon">✦</span>
+                Правила и возможности Кибер-арены
+            </h2>
+            <p class="block__text">
+                Вы можете пользоваться как предоставленным оборудованием арены, так и приносить 
+                свои устройства — ноутбуки, геймпады, наушники и другую периферию. Это позволяет 
+                играть в привычной обстановке и использовать свои настройки.
+            </p>
+            <ul class="block__list">
+                <li>Бронирование мест на определённое время</li>
+                <li>Участие в турнирах и командных матчах</li>
+                <li>Возможность принести свою технику</li>
+                <li>Доступ к полному спектру популярных игр</li>
+                <li>На этом сайте действует своя валюта в виде ARcoins (Arena-Coins). Зарабатывая коины, вы сможете обменивать их на подарки.</li>
+            </ul>
+            <br>
+            <div class="economy-module">
+                <h3 class="economy-module__title">Экономика и валюта</h3>
+                <p class="economy-module__base">База:</p>
+                <ul class="block__list">
+                    <li><strong>Начисление</strong> — за посещения, турниры, достижения</li>
+                    <li><strong>Трата</strong> — на кастомизацию профиля, приоритетные слоты, косметику, рамки и темы</li>
+                </ul>
+            </div>
+            <br>
+            <p class="pravila">
+                Правила:
+                <ul class="block__list">
+                    <li>Запрещено:</li>
+                        <ul>
+                            <li>Приходить с едой и напитками в открытом виде</li>
+                            <li>Запрещено использовать нецензурную лексику во все время нахождения на кибер-арене</li>
+                            <li>Запрещено бронировать места во время пар (уроков) </li>
+                        </ul>
+                    <li>Заходить на кибер-арену разрешено ТОЛЬКО с разрешения главного по арене</li>
+                </ul>
+            </p>
+        </section>
+    </main>
+
+    <!-- ========== Бронирование: заголовок, легенда, вкладки «Список» / «Схема», сетка мест ========== -->
+    <section class="booking booking--hidden" id="booking-content">
+        <div class="booking__hero">
+            <span class="booking__hero-icon">◈</span>
+            <h2 class="booking__title">Бронирование компьютеров</h2>
+            <p class="booking__subtitle">Выберите свободное место и укажите время — оборудование ждёт вас</p>
+            <div class="booking__legend">
+                <span class="booking__legend-item booking__legend-item--free"><i></i> Свободно</span>
+                <span class="booking__legend-item booking__legend-item--booked"><i></i> Занято</span>
+            </div>
+        </div>
+        <div class="booking__layout">
+            <div class="booking__grid-wrap">
+                <div class="booking__tabs">
+                    <button type="button" class="booking__tab booking__tab--active" data-view="list" aria-pressed="true">Список</button>
+                    <button type="button" class="booking__tab" data-view="scheme" aria-pressed="false">Схема</button>
+                </div>
+                <div class="booking__view booking__view--list" id="booking-view-list">
+                    <div class="booking__grid" id="booking-grid"></div>
+                </div>
+                <div class="booking__view booking__view--scheme booking__view--hidden" id="booking-view-scheme">
+                    <div class="booking__schemes-wrap" id="booking-schemes-wrap">
+                        <div class="booking__scheme">
+                            <div class="booking__scheme-floor" id="booking-scheme-floor"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside class="booking__sidebar">
+                <h3 class="booking__sidebar-title">Информация о ПК</h3>
+                <div class="booking__pc-info" id="booking-pc-info">
+                    <p class="booking__pc-placeholder">Наведите на место, чтобы увидеть характеристики</p>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <!-- Модальное окно бронирования: выбор даты, слота времени, кнопки отмена / забронировать -->
+    <div class="modal modal--hidden" id="booking-modal">
+        <div class="modal__overlay"></div>
+        <div class="modal__content booking-modal__content">
+            <div class="booking-modal__header">
+                <span class="booking-modal__badge">Место</span>
+                <h3 class="modal__title">Бронирование <span id="booking-modal-seat" class="booking-modal__seat-num"></span></h3>
+            </div>
+            <form class="modal__form" id="booking-form">
+                <h4 class="booking-time-picker__title">Выбери время брони</h4>
+                <p class="booking-time-picker__info">Зал открыт с 9:00 до 18:00. Доступны слоты по 20 минут.</p>
+                <div class="booking-time-picker__date-row">
+                    <label class="booking-time-picker__date-label">Дата</label>
+                    <input type="date" class="booking-time-picker__date-input" id="booking-date-input" required>
+                </div>
+                <p class="booking-time-picker__duration" id="booking-duration-text">Продолжительность 20 мин</p>
+                <div class="booking-time-picker booking-time-picker--slots">
+                    <div class="booking-time-picker__list booking-time-picker__list--single" id="booking-time-slots-list" role="listbox" aria-label="Доступные слоты"></div>
+                    <div class="booking-time-picker__summary" id="booking-time-summary">
+                        <span class="booking-time-picker__summary-date" id="booking-summary-date">5 марта</span>
+                        <span class="booking-time-picker__summary-start" id="booking-summary-start">10:00</span>
+                        <span class="booking-time-picker__summary-sep">до</span>
+                        <span class="booking-time-picker__summary-end" id="booking-summary-end">10:20</span>
+                        <span class="booking-time-picker__summary-date" id="booking-summary-date-end">5 марта</span>
+                    </div>
+                </div>
+                <input type="hidden" id="booking-date" name="booking-date">
+                <input type="hidden" id="booking-time-start" name="booking-time-start">
+                <input type="hidden" id="booking-time-end" name="booking-time-end">
+                <div class="modal__actions booking-modal__actions">
+                    <button type="button" class="booking-modal__cancel" id="booking-cancel">Отмена</button>
+                    <button type="submit" class="booking-modal__submit">
+                        <span class="booking-modal__submit-text">Забронировать</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== Турниры: фильтры по категории и формату, кнопка «Команда», сетка карточек ========== -->
+    <section class="tournaments tournaments--hidden" id="tournaments-content">
+        <div class="tournaments__filter-row">
+            <span class="tournaments__filter-label">Категория:</span>
+            <div class="tournaments__filter" id="tournaments-filter">
+                <button type="button" class="tournaments__filter-btn tournaments__filter-btn--active" data-category="">Все</button>
+                <button type="button" class="tournaments__filter-btn" data-category="CS2">CS2</button>
+                <button type="button" class="tournaments__filter-btn" data-category="Valorant">Valorant</button>
+                <button type="button" class="tournaments__filter-btn" data-category="Clash Royale">Clash Royale</button>
+                <button type="button" class="tournaments__filter-btn" data-category="Brawl Stars">Brawl Stars</button>
+                <button type="button" class="tournaments__filter-btn" data-category="Fortnite">Fortnite</button>
+                <button type="button" class="tournaments__filter-btn" data-category="WOT">WOT</button>
+            </div>
+        </div>
+        <div class="tournaments__filter-row">
+            <span class="tournaments__filter-label">Формат:</span>
+            <div class="tournaments__filter tournaments__filter--format" id="tournaments-filter-format">
+                <button type="button" class="tournaments__filter-btn tournaments__filter-btn--active" data-format="">Все</button>
+                <button type="button" class="tournaments__filter-btn" data-format="1v1">1v1</button>
+                <button type="button" class="tournaments__filter-btn" data-format="3v3">3v3</button>
+                <button type="button" class="tournaments__filter-btn" data-format="5v5">5v5</button>
+            </div>
+        </div>
+        <div class="tournaments__team-row">
+            <a href="kiber-profile/kiber-profile.html#team" class="tournaments__team-btn" id="tournaments-team-btn">Команда</a>
+        </div>
+        <div class="tournaments__grid" id="tournaments-grid"></div>
+    </section>
+
+    <!-- Модальное окно турнира: герой, описание, регистрация, матчи, результаты, награды -->
+    <div class="modal modal--hidden" id="tournament-modal">
+        <div class="tournament-modal__backdrop"></div>
+        <div class="tournament-modal__box">
+            <button type="button" class="tournament-modal__close" id="tournament-modal-close" aria-label="Закрыть"><span aria-hidden="true">×</span></button>
+            <div class="tournament-modal__hero" id="tournament-modal-hero">
+                <div class="tournament-modal__hero-bg" id="tournament-modal-hero-bg"></div>
+                <div class="tournament-modal__hero-overlay"></div>
+                <div class="tournament-modal__hero-content">
+                    <span class="tournament-modal__badge tournament-modal__badge--category" id="tournament-modal-category"></span>
+                    <span class="tournament-modal__badge tournament-modal__badge--format" id="tournament-modal-format"></span>
+                    <h2 class="tournament-modal__title" id="tournament-modal-title">Турнир</h2>
+                    <p class="tournament-modal__meta" id="tournament-modal-meta"></p>
+                </div>
+            </div>
+            <div class="tournament-modal__body">
+                <p class="tournament-modal__desc" id="tournament-modal-desc"></p>
+                <section class="tournament-modal__section tournament-modal__section--reg">
+                    <h3 class="tournament-modal__section-title"><span class="tournament-modal__section-icon">✓</span>Регистрация</h3>
+                    <p class="tournament-modal__reg-status" id="tournament-modal-reg-status"></p>
+                    <button type="button" class="tournament-modal__btn tournament-modal__btn--primary" id="tournament-modal-reg-btn">Записаться</button>
+                </section>
+                <section class="tournament-modal__section tournament-modal__section--bracket">
+                    <h3 class="tournament-modal__section-title"><span class="tournament-modal__section-icon">◉</span>Таблица матчей</h3>
+                    <div class="tournament-matches" id="tournament-modal-matches"></div>
+                </section>
+                <section class="tournament-modal__section tournament-modal__section--results">
+                    <h3 class="tournament-modal__section-title"><span class="tournament-modal__section-icon">▣</span>Результаты и лидеры</h3>
+                    <div class="tournament-results-table-wrap" id="tournament-modal-results-wrap">
+                        <table class="tournament-results-table" id="tournament-modal-results">
+                            <thead><tr><th>Место</th><th>Участник</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                        <p class="tournament-results-empty" id="tournament-modal-results-empty">Пока нет результатов</p>
+                    </div>
+                </section>
+                <section class="tournament-modal__section tournament-modal__section--rewards">
+                    <h3 class="tournament-modal__section-title"><span class="tournament-modal__section-icon">★</span>Награды</h3>
+                    <ul class="tournament-rewards-list" id="tournament-modal-rewards"></ul>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Лидерборд: поиск, фильтры, таблица (место, студент, группа, ARcoins) ========== -->
+    <section class="leaderboard leaderboard--hidden" id="leaderboard-content">
+        <div class="leaderboard__toolbar">
+            <div class="leaderboard__search">
+                <svg class="leaderboard__search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="leaderboard__search-input" placeholder="Поиск студента...">
+            </div>
+            <button class="leaderboard__filters" type="button">
+                <svg class="leaderboard__filter-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>
+                Фильтры
+            </button>
+        </div>
+        <div class="leaderboard__table-wrap">
+            <table class="leaderboard__table">
+                <thead>
+                    <tr>
+                        <th class="leaderboard__th leaderboard__th--sortable">МЕСТО <span class="leaderboard__sort">↕</span></th>
+                        <th class="leaderboard__th leaderboard__th--sortable">СТУДЕНТ <span class="leaderboard__sort">↕</span></th>
+                        <th class="leaderboard__th leaderboard__th--sortable">ГРУППА <span class="leaderboard__sort">↕</span></th>
+                        <th class="leaderboard__th leaderboard__th--sortable leaderboard__th--active">ARCOINs<span class="leaderboard__sort leaderboard__sort--desc">↓</span></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ========== Мои достижения: заголовок, сетка значков ========== -->
+    <section class="achievements achievements--hidden" id="achievements-content">
+        <div class="achievements__inner">
+            <h2 class="achievements__title">Мои достижения</h2>
+            <p class="achievements__sub">Выполняйте условия, чтобы получать значки и награды ARcoins.</p>
+            <div class="achievements__auth-msg achievements__auth-msg--hidden" id="achievements-auth-msg">Войдите в аккаунт, чтобы видеть свои достижения.</div>
+            <div class="achievements__grid" id="achievements-grid"></div>
+        </div>
+    </section>
+
+    <!-- ========== Обмен коинов: рамки аватарки, баннеры, готовые гифки ========== -->
+    <section class="exchange exchange--hidden" id="exchange-content">
+        <div class="exchange__inner">
+            <h2 class="exchange__title">Обмен коинов</h2>
+            <p class="exchange__sub">Тратьте ARcoins на кастомизацию профиля: рамки аватарки и баннеры. Они отображаются в вашем профиле.</p>
+            <div class="exchange__auth-msg exchange__auth-msg--hidden" id="exchange-auth-msg">Войдите в аккаунт, чтобы приобретать кастомизацию за коины.</div>
+            <div class="exchange__content" id="exchange-shop">
+                <div class="exchange__block">
+                    <h3 class="exchange__block-title">Рамки аватарки</h3>
+                    <div class="exchange__grid" id="exchange-frames"></div>
+                </div>
+                <div class="exchange__block">
+                    <h3 class="exchange__block-title">Баннеры профиля</h3>
+                    <div class="exchange__grid" id="exchange-banners"></div>
+                </div>
+                <div class="exchange__block">
+                    <h3 class="exchange__block-title">Готовые гифки</h3>
+                    <div class="exchange__grid" id="exchange-gifs"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== Подвал: логотип, ссылки, копирайт ========== -->
+    <footer class="footer">
+        <a href="kiber-arena.html" class="footer__logo">
+            <img src="forma-kiber/logo.png" alt="IT.МОСКВА">
+        </a>
+        <nav class="footer__nav">
+            <a href="#" class="footer__link">О нас</a>
+            <a href="kiber-profile/kiber-profile.html" class="footer__link">Личный кабинет</a>
+            <a href="kiber-arena-admin.html" class="footer__link footer__link--admin footer__link--hidden" id="admin-link">Админ-панель</a>
+        </nav>
+        <p class="footer__copy">IT.Москва | &copy;2026 все права защищены</p>
+    </footer>
+
+    <script src="kiber-arena-data.js"></script>
+    <script src="kiber-arena.js">
+    </script>
+</body>
+</html>

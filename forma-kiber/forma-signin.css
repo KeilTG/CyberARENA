@@ -1,0 +1,383 @@
+/* Тёмная тематика с синим неоном — киберспорт / видеоигры */
+
+html, body {
+  margin: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+body {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(85, 130, 255, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(85, 130, 255, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 50%, rgba(85, 130, 255, 0.08), transparent),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 60px,
+      rgba(85, 130, 255, 0.03) 60px,
+      rgba(85, 130, 255, 0.03) 61px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(85, 130, 255, 0.03) 60px,
+      rgba(85, 130, 255, 0.03) 61px
+    ),
+    linear-gradient(180deg, #0a0a12 0%, #0d0d1a 30%, #0a0a14 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(105deg, transparent 48%, rgba(85, 130, 255, 0.06) 50%, transparent 52%),
+    linear-gradient(-75deg, transparent 48%, rgba(85, 130, 255, 0.04) 50%, transparent 52%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+.signin-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.page-header__logo {
+  max-width: 280px;
+  height: auto;
+}
+
+.container {
+    max-width: 350px;
+    width: 100%;
+    background: #252525;
+    border-radius: 40px;
+    padding: 25px 35px;
+    
+    box-shadow: 0 0 30px rgba(85, 130, 255, 0.25), 0 0 60px rgba(85, 130, 255, 0.15);
+  }
+  
+  .heading {
+    text-align: center;
+    font-weight: 900;
+    font-size: 30px;
+    color: #5582FF;
+    text-shadow: 0 0 15px rgba(85, 130, 255, 0.8), 0 0 30px rgba(85, 130, 255, 0.5);
+  }
+  
+  .form {
+    margin-top: 20px;
+  }
+  
+  .form .input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 20px;
+    margin-top: 15px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+    border-inline: 2px solid transparent;
+  }
+  
+  .form .input::-moz-placeholder {
+    color: #404040;
+  }
+  
+  .form .input::placeholder {
+    color: #404040;
+  }
+  
+  .form .input:focus {
+    outline: none;
+    border-inline: 2px solid #5582FF;
+    box-shadow: 0 0 15px rgba(85, 130, 255, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.3);
+  }
+  
+  .form .forgot-password {
+    display: block;
+    margin-top: 10px;
+    margin-left: 10px;
+  }
+  
+  .form .forgot-password a {
+    font-size: 11px;
+    color: #5582FF;
+    text-decoration: none;
+    text-shadow: 0 0 10px rgba(85, 130, 255, 0.6);
+  }
+  
+  
+
+  
+  .form .login-button {
+    display: block;
+    width: 100%;
+    font-weight: bold;
+    background: #5582FF;
+    color: white;
+    padding-block: 15px;
+    margin: 20px auto;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(85, 130, 255, 0.6), 0 0 40px rgba(85, 130, 255, 0.3);
+    border: none;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .form .login-button:hover {
+    transform: scale(1.03);
+    box-shadow: 0 0 25px rgba(85, 130, 255, 0.8), 0 0 50px rgba(85, 130, 255, 0.5);
+  }
+  
+  .form .login-button:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 15px rgba(85, 130, 255, 0.5), 0 0 30px rgba(85, 130, 255, 0.3);
+  }
+  
+  .social-account-container {
+    margin-top: 25px;
+  }
+  
+  .social-account-container .title {
+    display: block;
+    text-align: center;
+    font-size: 10px;
+    color: #5582FF;
+    text-shadow: 0 0 10px rgba(85, 130, 255, 0.6);
+  }
+  
+  .social-account-container .social-accounts {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 5px;
+  }
+  
+  .social-account-container .social-accounts .social-button {
+    background: #1a1a1a;
+    border: 5px solid #252525;
+    padding: 5px;
+    border-radius: 50%;
+    width: 40px;
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    box-shadow: 0 0 15px rgba(85, 130, 255, 0.4);
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .social-account-container .social-accounts .social-button .svg {
+    fill: #5582FF;
+    margin: auto;
+    filter: drop-shadow(0 0 5px rgba(85, 130, 255, 0.8));
+  }
+  
+  .social-account-container .social-accounts .social-button:hover {
+    transform: scale(1.2);
+  }
+  
+  .social-account-container .social-accounts .social-button:active {
+    transform: scale(0.9);
+  }
+  
+  .agreement {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+  }
+  
+  .agreement a {
+    text-decoration: none;
+    color: #5582FF;
+    font-size: 9px;
+    text-shadow: 0 0 8px rgba(85, 130, 255, 0.5);
+  }
+
+  .signup {
+    text-align: center;
+    font-size: 1rem;
+    line-height: 1rem;
+    color: #404040;
+  }
+.regi {
+    text-decoration: none;
+    color: #5582FF;
+    text-shadow: 0 0 8px rgba(85, 130, 255, 0.5);
+}
+
+  .kiber {
+    color: #5582FF;
+    text-shadow: 0 0 10px rgba(85, 130, 255, 0.6);
+  }
+/* Скопируйте сюда стили для уведомлений из forma-signin.html */
+    .notification-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 350px;
+    }
+
+    .notification {
+        background: #252525;
+        border-radius: 12px;
+        padding: 16px 20px;
+        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        color: white;
+        font-size: 1rem;
+        transform: translateX(100%);
+        animation: slideIn 0.3s ease forwards;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        backdrop-filter: blur(10px);
+        margin-bottom: 10px;
+    }
+
+    .notification.success {
+        border-left: 4px solid #00ff88;
+        box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    }
+
+    .notification.error {
+        border-left: 4px solid #ff4444;
+        box-shadow: 0 0 30px rgba(255, 68, 68, 0.3);
+    }
+
+    .notification__icon {
+        font-size: 1.5rem;
+    }
+
+    .notification.success .notification__icon {
+        color: #00ff88;
+    }
+
+    .notification.error .notification__icon {
+        color: #ff4444;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .notification.fade-out {
+        animation: fadeOut 0.3s ease forwards;
+    }
+
+    @keyframes fadeOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .notification-container {
+            left: 20px;
+            right: 20px;
+            max-width: none;
+        }
+    }
+    /* Стили для уведомлений */
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 350px;
+}
+
+.notification {
+    background: #252525;
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: white;
+    font-size: 1rem;
+    transform: translateX(100%);
+    animation: slideIn 0.3s ease forwards;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 10px;
+    border-left: 4px solid;
+}
+
+.notification.success {
+    border-left-color: #00ff88;
+}
+
+.notification.error {
+    border-left-color: #ff4444;
+}
+
+.notification__icon {
+    font-size: 1.5rem;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification.fade-out {
+    animation: fadeOut 0.3s ease forwards;
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .notification-container {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}

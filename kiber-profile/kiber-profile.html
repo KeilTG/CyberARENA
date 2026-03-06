@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="kiber-profile.css">
+    <title>Профиль — Кибер-арена</title>
+</head>
+<body>
+    <header class="profile-header">
+        <a href="../kiber-arena.html" class="profile-header__logo">
+            <img src="../forma-kiber/logo.png" alt="IT.МОСКВА">
+        </a>
+        <a href="../kiber-arena.html" class="profile-header__back">← На главную</a>
+    </header>
+
+    <main class="profile-main" id="profile-main">
+        <div class="profile-auth" id="profile-auth">
+            <p>Войдите или зарегистрируйтесь, чтобы просмотреть профиль.</p>
+            <a href="../forma-kiber/forma-signin.html" class="profile-btn">Войти</a>
+            <a href="../forma-kiber/forma-signup.html" class="profile-btn profile-btn--primary">Регистрация</a>
+        </div>
+
+        <div class="profile-content profile-content--hidden" id="profile-content">
+            <section class="profile-card profile-card--hero" id="profile-hero-card">
+                <button type="button" class="profile-settings-btn" id="profile-settings-btn" aria-label="Настройки профиля">Настройки профиля</button>
+                <div class="profile-hero">
+                    <div class="profile-avatar-wrap" id="profile-avatar-wrap">
+                        <div class="profile-avatar" id="profile-avatar"></div>
+                        <label class="profile-avatar-edit" for="avatar-input">
+                            <span>✎</span> Изменить фото
+                        </label>
+                        <input type="file" id="avatar-input" accept="image/*" class="profile-avatar-input">
+                    </div>
+                    <div class="profile-hero__info">
+                        <h1 class="profile-name" id="profile-fio">—</h1>
+                        <p class="profile-email" id="profile-email">—</p>
+                        <p class="profile-group" id="profile-group">—</p>
+                        <div class="profile-coins">
+                            <span class="profile-coins__icon">✦</span>
+                            <span class="profile-coins__value" id="profile-coins">0</span>
+                            <span class="profile-coins__label">ARcoins</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-card profile-card--customization profile-card--customization--hidden" id="profile-customization-section">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">✨</span>
+                    Кастомизация
+                </h2>
+                <p class="profile-customization-hint">Рамка аватарки и баннер приобретаются во вкладке <a href="../kiber-arena.html#exchange" id="profile-exchange-link">Обмен коинов</a> за ARcoins.</p>
+                <div class="profile-owned-wrap">
+                    <h3 class="profile-owned__title">Купленные рамки</h3>
+                    <div class="profile-owned__grid" id="profile-owned-frames"></div>
+                </div>
+                <div class="profile-owned-wrap">
+                    <h3 class="profile-owned__title">Купленные баннеры</h3>
+                    <div class="profile-owned__grid" id="profile-owned-banners"></div>
+                </div>
+                <div class="profile-gif-banner-wrap profile-gif-banner-wrap--hidden" id="profile-gif-banner-wrap">
+                    <label class="profile-gif-banner-label">Баннер: GIF или видео MP4 (не более 5 сек)</label>
+                    <input type="url" class="profile-gif-banner-input" id="profile-banner-gif-url" placeholder="https://...gif или .mp4">
+                    <div class="profile-gif-banner-row">
+                        <button type="button" class="profile-gif-banner-save" id="profile-banner-gif-save">Сохранить ссылку</button>
+                    </div>
+                    <p class="profile-gif-banner-or">или</p>
+                    <label class="profile-gif-banner-file-label">
+                        <span class="profile-gif-banner-file-btn">Выбрать GIF или MP4 (до 5 сек)</span>
+                        <input type="file" id="profile-banner-gif-file" accept="image/gif,.gif,video/mp4,.mp4" class="profile-gif-banner-file-input">
+                    </label>
+                    <p class="profile-gif-banner-hint" id="profile-banner-gif-file-hint"></p>
+                </div>
+            </section>
+
+            <section class="profile-card" id="profile-team-section">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">👥</span>
+                    Моя команда
+                </h2>
+                <div class="profile-team" id="profile-team">
+                    <div class="profile-team__empty-wrap" id="profile-team-empty-wrap">
+                        <p class="profile-team__empty" id="profile-team-empty">У вас пока нет команды. Создайте команду или перейдите по пригласительной ссылке.</p>
+                        <button type="button" class="profile-team__create" id="profile-team-create">Создать команду</button>
+                    </div>
+                    <div class="profile-team__has-team profile-team__has-team--hidden" id="profile-team-has">
+                        <div class="profile-team__name-row">
+                            <p class="profile-team__name" id="profile-team-name"></p>
+                            <button type="button" class="profile-team__edit-name profile-team__edit-name--hidden" id="profile-team-edit-name" title="Изменить название">✎</button>
+                        </div>
+                        <div class="profile-team__name-edit profile-team__name-edit--hidden" id="profile-team-name-edit">
+                            <input type="text" class="profile-team__name-input" id="profile-team-name-input" placeholder="Название команды" maxlength="80">
+                            <button type="button" class="profile-team__name-save" id="profile-team-name-save">Сохранить</button>
+                            <button type="button" class="profile-team__name-cancel" id="profile-team-name-cancel">Отмена</button>
+                        </div>
+                        <h3 class="profile-team__subtitle">Сокомандники</h3>
+                        <ul class="profile-team__members" id="profile-team-members"></ul>
+                        <div class="profile-team__search-wrap profile-team__search-wrap--hidden" id="profile-team-search-wrap">
+                            <label class="profile-team__search-label">Поиск участников по ФИО</label>
+                            <div class="profile-team__search-row">
+                                <input type="text" class="profile-team__search-input" id="profile-team-search-input" placeholder="Введите ФИО..." autocomplete="off">
+                                <div class="profile-team__search-dropdown" id="profile-team-search-dropdown"></div>
+                            </div>
+                        </div>
+                        <div class="profile-team__invite">
+                            <label class="profile-team__invite-label">Пригласительная ссылка — отправьте участникам:</label>
+                            <div class="profile-team__invite-row">
+                                <input type="text" class="profile-team__invite-input" id="profile-team-invite-input" readonly>
+                                <button type="button" class="profile-team__invite-copy" id="profile-team-invite-copy">Копировать</button>
+                            </div>
+                        </div>
+                        <button type="button" class="profile-team__leave" id="profile-team-leave">Выйти из команды</button>
+                    </div>
+                    <div class="profile-team__no-team profile-team__no-team--hidden" id="profile-team-no"></div>
+                    <div class="profile-team__invitations-wrap" id="profile-team-invitations-wrap">
+                        <h3 class="profile-team__subtitle">Приглашения в команды</h3>
+                        <div class="profile-team__invitations-list" id="profile-team-invitations-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="profile-card">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">🏆</span>
+                    Мои достижения
+                </h2>
+                <div class="profile-achievements" id="profile-achievements-list"></div>
+            </section>
+
+            <section class="profile-card">
+                <h2 class="profile-card__title">
+                    <span class="profile-card__icon">📅</span>
+                    История бронирований
+                </h2>
+                <div class="profile-history" id="profile-history">
+                    <div class="profile-booking-notice profile-booking-notice--hidden" id="profile-booking-notice"></div>
+                    <p class="profile-history__empty" id="profile-history-empty">История пуста</p>
+                    <div class="profile-history__list" id="profile-history-list"></div>
+                </div>
+            </section>
+
+            <div class="profile-logout-wrap">
+                <button type="button" class="profile-logout-btn" id="profile-logout">Выйти с аккаунта</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <a href="../kiber-arena.html" class="footer__logo">
+            <img src="../forma-kiber/logo.png" alt="IT.МОСКВА">
+        </a>
+        <nav class="footer__nav">
+            <a href="#" class="footer__link">О нас</a>
+            <a href="../forma-kiber/forma-signin.html" class="footer__link">Личный кабинет</a>
+            <a href="../kiber-arena-admin.html" class="footer__link footer__link--admin footer__link--hidden" id="admin-link">Админ-панель</a>
+        </nav>
+        <p class="footer__copy">IT.Москва | &copy;2026 все права защищены</p>
+    </footer>
+
+    <script src="../kiber-arena-data.js"></script>
+    <script src="kiber-profile.js"></script>
+</body>
+</html>

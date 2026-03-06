@@ -1,0 +1,3562 @@
+/*
+ * Кибер-арена — основные стили
+ * Тема: тёмный фон, синий неон (#5582FF), киберспорт / видеоигры
+ *
+ * Содержание:
+ * 1. Базовые стили (html, body, фон)
+ * 2. Шапка (header, навигация, пользователь, бургер)
+ * 3. Приветственная карточка
+ * 4. Главная (main, блоки контента)
+ * 5. Турниры (карточки, фильтры, кнопки)
+ * 6. Модальное окно турнира
+ * 7. Бронирование (схема, список, модалка)
+ * 8. Лидерборд
+ * 9. Достижения
+ * 10. Обмен коинов
+ * 11. Подвал (footer)
+ * 12. Модальные окна (общие)
+ * 13. Кастомизация (рамки, баннеры)
+ * 14. Адаптив (медиазапросы)
+ */
+
+/* ==================== 1. Базовые стили: сброс, фон, сетка ==================== */
+
+html, body {
+  margin: 0;
+  min-height: 100vh;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(85, 130, 255, 0.15), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, rgba(85, 130, 255, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 0% 50%, rgba(85, 130, 255, 0.08), transparent),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 60px,
+      rgba(85, 130, 255, 0.03) 60px,
+      rgba(85, 130, 255, 0.03) 61px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(85, 130, 255, 0.03) 60px,
+      rgba(85, 130, 255, 0.03) 61px
+    ),
+    linear-gradient(180deg, #0a0a12 0%, #0d0d1a 30%, #0a0a14 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(105deg, transparent 48%, rgba(85, 130, 255, 0.06) 50%, transparent 52%),
+    linear-gradient(-75deg, transparent 48%, rgba(85, 130, 255, 0.04) 50%, transparent 52%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==================== 2. Шапка: логотип, навигация, кнопка входа ==================== */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+   background: rgba(18, 18, 28, 0.9);
+  border-bottom: 1px solid rgba(85, 130, 255, 0.2);
+  box-shadow: 0 0 20px rgba(85, 130, 255, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.header__logo img {
+  height: 40px;
+  width: auto;
+}
+
+.header__nav {
+  display: flex;
+  gap: 32px;
+}
+
+.header__link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.2s, text-shadow 0.2s;
+}
+
+.header__link:hover {
+  color: #5582FF;
+  text-shadow: 0 0 10px rgba(85, 130, 255, 0.6);
+}
+
+.header__btn {
+  padding: 10px 24px;
+  background: #5582FF;
+  color: white;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(85, 130, 255, 0.4);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.header__btn:hover {
+  box-shadow: 0 0 25px rgba(85, 130, 255, 0.6), 0 0 40px rgba(85, 130, 255, 0.3);
+  transform: scale(1.03);
+}
+
+.header__user-area {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Бургер — только на мобильных, на ПК скрыт */
+.header__burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  background: rgba(85, 130, 255, 0.15);
+  border: 1px solid rgba(85, 130, 255, 0.35);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.header__burger-line {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1px;
+  transition: transform 0.25s, opacity 0.25s;
+}
+
+.header__logout {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(85, 130, 255, 0.4);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.header__logout:hover {
+  background: rgba(220, 100, 100, 0.2);
+  border-color: rgba(220, 100, 100, 0.5);
+  color: #ff8a80;
+}
+
+.header__logout-icon {
+  display: block;
+}
+
+.header__user-block {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.header__user-block:hover {
+  color: #5582FF;
+}
+
+.header__user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.header__user-name {
+  white-space: nowrap;
+}
+
+.header__user-coins {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(85, 130, 255, 0.9);
+}
+
+.header__user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+  border: 2px solid rgba(85, 130, 255, 0.3);
+  box-shadow: 0 0 15px rgba(85, 130, 255, 0.2);
+  overflow: hidden;
+}
+
+.header__user-avatar--img {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-size: 0;
+}
+
+.header__user-avatar-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* ==================== 13. Кастомизация: рамки аватарки в шапке (золото, неон, серебро, радуга) ==================== */
+
+.header__user-avatar-wrap.custom-frame--frame-gold,
+.header__user-avatar-wrap.custom-frame--frame-neon,
+.header__user-avatar-wrap.custom-frame--frame-silver,
+.header__user-avatar-wrap.custom-frame--frame-rainbow {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.header__user-avatar-wrap.custom-frame--frame-gold {
+  border: 3px solid #d4af37;
+  box-shadow: 0 0 12px rgba(212, 175, 55, 0.6);
+}
+
+.header__user-avatar-wrap.custom-frame--frame-gold .header__user-avatar {
+  border: none;
+  box-shadow: none;
+}
+
+.header__user-avatar-wrap.custom-frame--frame-neon {
+  border: 3px solid #5582FF;
+  box-shadow: 0 0 15px rgba(85, 130, 255, 0.8);
+}
+
+.header__user-avatar-wrap.custom-frame--frame-neon .header__user-avatar {
+  border: none;
+  box-shadow: none;
+}
+
+.header__user-avatar-wrap.custom-frame--frame-silver {
+  border: 3px solid #c0c0c0;
+  box-shadow: 0 0 12px rgba(192, 192, 192, 0.5);
+}
+
+.header__user-avatar-wrap.custom-frame--frame-silver .header__user-avatar {
+  border: none;
+  box-shadow: none;
+}
+
+.header__user-avatar-wrap.custom-frame--frame-rainbow {
+  border: 3px solid transparent;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+
+.header__user-avatar-wrap.custom-frame--frame-rainbow .header__user-avatar {
+  border: none;
+  box-shadow: none;
+}
+
+/* ==================== 3. Приветственная карточка (выбор раздела) ==================== */
+
+.welcome-card {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome-card.welcome-card--hidden {
+  display: none;
+}
+
+.welcome-card__inner {
+  text-align: center;
+  padding: 56px 48px;
+  background: linear-gradient(145deg, #1e1e28 0%, #252530 100%);
+  border-radius: 28px;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+  box-shadow:
+    0 0 40px rgba(85, 130, 255, 0.15),
+    0 0 80px rgba(85, 130, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-card__inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(85, 130, 255, 0.5), transparent);
+}
+
+.welcome-card__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #5582FF;
+  background: rgba(85, 130, 255, 0.12);
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(85, 130, 255, 0.3);
+  animation: welcome-icon-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes welcome-icon-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 25px rgba(85, 130, 255, 0.3); }
+  50% { opacity: 0.85; box-shadow: 0 0 35px rgba(85, 130, 255, 0.45); }
+}
+
+.welcome-card__title {
+  margin: 0 0 12px 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 30px rgba(85, 130, 255, 0.4);
+}
+
+.welcome-card__text {
+  margin: 0;
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ==================== 4. Главная: контейнер и блоки текста ==================== */
+
+.main.main--hidden {
+  display: none;
+}
+
+.main {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+}
+
+/* Блоки контента */
+.block {
+  background: #252525;
+  border-radius: 24px;
+  padding: 30px 35px;
+  margin-bottom: 24px;
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.25), 0 0 60px rgba(85, 130, 255, 0.15);
+}
+
+.block:last-child {
+  margin-bottom: 0;
+}
+
+.economy-module {
+  margin-top: 20px;
+  padding: 20px 24px;
+  background: rgba(85, 130, 255, 0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+}
+
+.economy-module__title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #5582FF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.economy-module__base {
+  margin: 0 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.economy-module .block__list {
+  margin-top: 4px;
+}
+
+.block__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-shadow: 0 0 15px rgba(85, 130, 255, 0.8), 0 0 30px rgba(85, 130, 255, 0.5);
+}
+
+.pravila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #5582FF;
+}
+
+.block__icon {
+  color: #5582FF;
+  text-shadow: 0 0 10px rgba(85, 130, 255, 0.9);
+}
+
+.block__text {
+  margin: 0 0 14px 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.block__text:last-of-type {
+  margin-bottom: 0;
+}
+
+.block__text strong {
+  color: #5582FF;
+}
+
+.block__list {
+  margin: 14px 0 0 0;
+  padding-left: 24px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+.block__list li {
+  margin-bottom: 6px;
+}
+
+/* ==================== 5. Турниры: секция, фильтры, кнопка «Команда», карточки ==================== */
+
+.tournaments.tournaments--hidden {
+  display: none;
+}
+
+.tournaments {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.tournaments__filter-row {
+  margin-bottom: 16px;
+}
+
+.tournaments__filter-row:last-of-type {
+  margin-bottom: 16px;
+}
+
+.tournaments__team-row {
+  margin-bottom: 24px;
+}
+
+.tournaments__team-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #5582FF, #3d6ae6);
+  color: #fff;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 12px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(85, 130, 255, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tournaments__team-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(85, 130, 255, 0.5);
+}
+
+.tournaments__team-btn:active {
+  transform: translateY(0);
+}
+
+.tournaments__filter-label {
+  display: block;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 8px;
+}
+
+.tournaments__filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tournaments__filter-btn {
+  padding: 10px 18px;
+  background: #252525;
+  border: 1px solid rgba(85, 130, 255, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tournaments__filter-btn:hover {
+  border-color: #5582FF;
+  color: #5582FF;
+  box-shadow: 0 0 15px rgba(85, 130, 255, 0.2);
+}
+
+.tournaments__filter-btn--active {
+  background: linear-gradient(135deg, #5582FF 0%, #4568dc 100%);
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(85, 130, 255, 0.4);
+}
+
+.tournaments__filter-btn--active:hover {
+  box-shadow: 0 0 25px rgba(85, 130, 255, 0.5);
+}
+
+.tournaments__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.event-card {
+  background: #252525;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.25), 0 0 60px rgba(85, 130, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.event-card__title {
+  margin: 0;
+  padding: 20px 60px 8px 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-align: center;
+  text-shadow: 0 0 15px rgba(85, 130, 255, 0.6);
+}
+
+.event-card__format {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(85, 130, 255, 0.4);
+  border: 1px solid rgba(85, 130, 255, 0.5);
+}
+
+.event-card__format--3v3 {
+  background: rgba(76, 175, 80, 0.35);
+  border-color: rgba(76, 175, 80, 0.6);
+}
+
+.event-card__format--5v5 {
+  background: rgba(255, 152, 0, 0.35);
+  border-color: rgba(255, 152, 0, 0.6);
+}
+
+.event-card__image {
+  flex: 1;
+  min-height: 180px;
+  background: #1a1a1a;
+  background-size: cover;
+  background-position: center;
+}
+
+.event-card__footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.event-card__btn {
+  padding: 8px 16px;
+  font-size: 1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: opacity 0.2s, background-color 0.2s;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.event-card__btn--left {
+  background: #5582FF;
+  color: #fff;
+}
+
+.event-card__btn--left:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.event-card__btn--left.event-card__btn--registered {
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+}
+.event-card__btn--left.event-card__btn--registered:hover:not(:disabled) {
+  background: rgba(255, 107, 107, 0.35);
+  color: #ff6b6b;
+}
+
+.event-card__btn--left.event-card__btn--disabled {
+  background: rgba(85, 130, 255, 0.35);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+.event-card__btn--right {
+  background: #555;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.event-card__btn--right:hover:not(:disabled) {
+  opacity: 0.9;
+  background: #666;
+}
+
+.event-card__btn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.event-card__btn--registered {
+  color: rgba(255, 255, 255, 0.85);
+}
+.event-card__btn--registered:hover:not(:disabled) {
+  color: #ff6b6b;
+}
+
+.event-card__btn--disabled {
+  color: rgba(255, 255, 255, 0.4);
+  cursor: not-allowed;
+}
+
+/* ==================== 6. Модальное окно турнира (подробнее) ==================== */
+
+#tournament-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+#tournament-modal.modal--hidden {
+  display: none;
+}
+
+.tournament-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+}
+
+.tournament-modal__box {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #1a1a24 0%, #14141c 100%);
+  border-radius: 24px;
+  border: 1px solid rgba(85, 130, 255, 0.22);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 25px 60px rgba(0, 0, 0, 0.6),
+    0 0 80px rgba(85, 130, 255, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.tournament-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tournament-modal__close:hover {
+  background: rgba(220, 80, 80, 0.25);
+  border-color: rgba(220, 100, 100, 0.5);
+  color: #ff8a80;
+  transform: scale(1.05);
+}
+
+/* Герой: картинка + заголовок */
+.tournament-modal__hero {
+  position: relative;
+  min-height: 140px;
+  padding: 32px 24px 24px;
+  padding-right: 56px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #1e1e2a 0%, #252535 50%, #1a1a24 100%);
+}
+
+.tournament-modal__hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-color: #1e1e2a;
+}
+
+.tournament-modal__hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.75) 100%);
+  border-radius: 24px 24px 0 0;
+}
+
+.tournament-modal__hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.tournament-modal__badge {
+  display: inline-block;
+  padding: 4px 10px;
+  margin-right: 8px;
+  margin-bottom: 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: 8px;
+}
+
+.tournament-modal__badge--category {
+  background: rgba(85, 130, 255, 0.35);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(85, 130, 255, 0.5);
+}
+
+.tournament-modal__badge--format {
+  background: rgba(76, 175, 80, 0.25);
+  color: #a5d6a7;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.tournament-modal__title {
+  margin: 0 0 6px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.01em;
+  line-height: 1.25;
+}
+
+.tournament-modal__meta {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+/* Тело модалки: скролл */
+.tournament-modal__body {
+  padding: 0 24px 28px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.tournament-modal__body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tournament-modal__body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.tournament-modal__body::-webkit-scrollbar-thumb {
+  background: rgba(85, 130, 255, 0.4);
+  border-radius: 4px;
+}
+
+.tournament-modal__desc {
+  margin: 0 0 24px 0;
+  padding: 16px 18px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.55;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  border: 1px solid rgba(85, 130, 255, 0.1);
+}
+
+/* Секции */
+.tournament-modal__section {
+  margin-bottom: 24px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  border: 1px solid rgba(85, 130, 255, 0.12);
+}
+
+.tournament-modal__section:last-child {
+  margin-bottom: 0;
+}
+
+.tournament-modal__section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.tournament-modal__section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 0.85rem;
+  color: #5582FF;
+  background: rgba(85, 130, 255, 0.2);
+  border-radius: 10px;
+}
+
+.tournament-modal__reg-status {
+  margin: 0 0 14px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
+.tournament-modal__btn {
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid rgba(85, 130, 255, 0.5);
+  background: linear-gradient(180deg, rgba(85, 130, 255, 0.25) 0%, rgba(85, 130, 255, 0.12) 100%);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tournament-modal__btn:hover:not(:disabled) {
+  border-color: rgba(85, 130, 255, 0.8);
+  box-shadow: 0 0 20px rgba(85, 130, 255, 0.3);
+}
+
+.tournament-modal__btn--primary {
+  background: linear-gradient(135deg, #5582FF 0%, #4568dc 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(85, 130, 255, 0.4);
+}
+
+.tournament-modal__btn--primary:hover:not(:disabled) {
+  box-shadow: 0 6px 28px rgba(85, 130, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.tournament-modal__btn--danger {
+  background: linear-gradient(135deg, rgba(200, 60, 60, 0.5) 0%, rgba(160, 50, 50, 0.4) 100%);
+  border-color: rgba(220, 100, 100, 0.5);
+}
+
+.tournament-modal__btn--danger:hover:not(:disabled) {
+  box-shadow: 0 0 20px rgba(220, 80, 80, 0.35);
+}
+
+/* Матчи */
+.tournament-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tournament-match {
+  display: grid;
+  grid-template-columns: 72px 1fr 56px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(85, 130, 255, 0.1);
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tournament-match:hover {
+  border-color: rgba(85, 130, 255, 0.25);
+  box-shadow: 0 0 12px rgba(85, 130, 255, 0.08);
+}
+
+.tournament-match__num {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.tournament-match__score {
+  text-align: right;
+  color: #5582FF;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.tournament-match--team {
+  grid-template-columns: 72px 1fr 56px;
+}
+
+.tournament-match--team .tournament-match__teams {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tournament-match__team {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  border: 1px solid rgba(85, 130, 255, 0.12);
+}
+
+.tournament-match__team-label {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.tournament-match__team-players {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tournament-matches-empty {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  border: 1px dashed rgba(85, 130, 255, 0.15);
+}
+
+/* Таблица результатов */
+.tournament-results-table-wrap {
+  position: relative;
+  min-height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(85, 130, 255, 0.1);
+}
+
+.tournament-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.tournament-results-table th,
+.tournament-results-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tournament-results-table thead {
+  background: rgba(85, 130, 255, 0.12);
+}
+
+.tournament-results-table th {
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tournament-results-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tournament-results-table tbody tr:hover td {
+  background: rgba(85, 130, 255, 0.06);
+}
+
+.tournament-results-empty {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.9rem;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* Награды */
+.tournament-rewards-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tournament-reward-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  background: rgba(85, 130, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(85, 130, 255, 0.18);
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tournament-reward-item:last-child {
+  margin-bottom: 0;
+}
+
+.tournament-reward-item:hover {
+  border-color: rgba(85, 130, 255, 0.3);
+  box-shadow: 0 0 12px rgba(85, 130, 255, 0.1);
+}
+
+.tournament-reward-place {
+  flex-shrink: 0;
+  min-width: 90px;
+  font-weight: 700;
+  color: #5582FF;
+  font-size: 0.9rem;
+}
+
+/* ==================== 7. Бронирование: герой, вкладки, схема зала, места, сайдбар ==================== */
+
+.booking.booking--hidden {
+  display: none;
+}
+
+.booking {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+.booking__hero {
+  text-align: center;
+  margin-bottom: 32px;
+  padding: 24px 20px;
+  background: linear-gradient(145deg, rgba(30, 30, 40, 0.6) 0%, rgba(22, 22, 32, 0.8) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(85, 130, 255, 0.15);
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.08);
+}
+
+.booking__hero-icon {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+  font-size: 1.5rem;
+  color: #5582FF;
+  background: rgba(85, 130, 255, 0.12);
+  border-radius: 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 0 20px rgba(85, 130, 255, 0.25);
+}
+
+.booking__title {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-shadow: 0 0 20px rgba(85, 130, 255, 0.5);
+  letter-spacing: 0.02em;
+}
+
+.booking__subtitle {
+  margin: 0 0 20px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.5;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.booking__legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.booking__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.booking__legend-item i {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 6px;
+}
+
+.booking__legend-item--free i {
+  background: linear-gradient(160deg, rgba(85, 130, 255, 0.35) 0%, rgba(69, 105, 220, 0.5) 100%);
+  border: 1px solid rgba(85, 130, 255, 0.55);
+  box-shadow: 0 0 10px rgba(85, 130, 255, 0.2);
+}
+
+.booking__legend-item--booked i {
+  background: linear-gradient(160deg, rgba(35, 38, 55, 0.95) 0%, rgba(28, 32, 48, 0.98) 100%);
+  border: 1px solid rgba(85, 130, 255, 0.2);
+}
+
+.booking__layout {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.booking__grid-wrap {
+  flex: 1;
+  background: linear-gradient(160deg, #1e1e26 0%, #18181f 50%, #15151a 100%);
+  border-radius: 22px;
+  padding: 28px 24px;
+  box-shadow:
+    0 0 0 1px rgba(85, 130, 255, 0.1),
+    0 0 50px rgba(85, 130, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(85, 130, 255, 0.18);
+  position: relative;
+  overflow: hidden;
+}
+
+.booking__grid-wrap::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(85, 130, 255, 0.35), transparent);
+  opacity: 0.8;
+}
+
+.booking__tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 4px;
+  width: fit-content;
+}
+
+.booking__tab {
+  padding: 10px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 10px;
+}
+
+.booking__tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.booking__tab--active {
+  color: #fff;
+  background: rgba(85, 130, 255, 0.35);
+  box-shadow: 0 0 12px rgba(85, 130, 255, 0.2);
+}
+
+.booking__view {
+  min-height: 200px;
+}
+
+.booking__view--hidden {
+  display: none;
+}
+
+/* Схема зала (вид сверху, как на скриншоте) */
+.booking__scheme {
+  width: 100%;
+  aspect-ratio: 16/10;
+  max-height: 420px;
+  background: linear-gradient(160deg, #1a2332 0%, #15202b 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+}
+
+.booking__scheme-floor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(85, 130, 255, 0.12) 0%, rgba(85, 130, 255, 0.06) 100%);
+  border: 1px solid rgba(85, 130, 255, 0.25);
+  border-radius: 14px;
+  margin: 12px;
+  box-sizing: border-box;
+}
+
+/* Вход и линии пространства на схеме */
+.booking__scheme-entrance {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10%;
+  max-width: 48px;
+  height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(85, 130, 255, 0.15);
+  border: 1px solid rgba(85, 130, 255, 0.4);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.booking__scheme-entrance-arrow {
+  font-size: 1.1rem;
+  color: #5582FF;
+  line-height: 1;
+}
+
+.booking__scheme-entrance-text {
+  line-height: 1.2;
+}
+
+.booking__scheme-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(85, 130, 255, 0.5), rgba(85, 130, 255, 0.6), rgba(85, 130, 255, 0.5), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.booking__scheme-line--top {
+  top: 0;
+}
+
+.booking__scheme-line--middle {
+  /* top задаётся в inline style */
+}
+
+.booking__scheme-line--bottom {
+  /* top задаётся в inline style */
+}
+
+.booking__scheme-room-name {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  padding: 4px 12px;
+  background: rgba(85, 130, 255, 0.2);
+  border: 1px solid rgba(85, 130, 255, 0.4);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.booking__scheme-zone {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.booking__scheme-zone--closed {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.booking__schemes-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.booking__scheme--extra {
+  width: 100%;
+  aspect-ratio: 16/10;
+  max-height: 420px;
+  background: linear-gradient(160deg, #1a2332 0%, #15202b 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.booking__scheme--extra .booking__scheme-floor {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+}
+
+.booking__scheme-zone--full {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.booking__scheme-zone-grid {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.booking__scheme-row-spacer {
+  grid-column: 1 / -1;
+  min-height: 8px;
+  pointer-events: none;
+}
+
+.booking__scheme-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  background: linear-gradient(145deg, rgba(85, 130, 255, 0.35) 0%, rgba(69, 105, 220, 0.5) 100%);
+  border: 1px solid rgba(85, 130, 255, 0.55);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 6px rgba(85, 130, 255, 0.2);
+}
+
+.booking__scheme-seat:hover {
+  border-color: rgba(85, 130, 255, 0.85);
+  box-shadow: 0 0 16px rgba(85, 130, 255, 0.4);
+  transform: scale(1.03);
+}
+
+.booking__scheme-seat--booked {
+  background: linear-gradient(145deg, rgba(35, 38, 55, 0.95) 0%, rgba(28, 32, 48, 0.98) 100%);
+  border-color: rgba(85, 130, 255, 0.2);
+  cursor: default;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.booking__scheme-seat--booked:hover {
+  transform: none;
+  box-shadow: 0 0 8px rgba(85, 130, 255, 0.15);
+}
+
+.booking__scheme-seat-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.2;
+}
+
+.booking__scheme-seat-fio {
+  font-size: 0.55rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.1;
+}
+
+.booking__scheme-seat-time {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.booking__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(88px, 1fr));
+  gap: 14px;
+}
+
+/* Контейнер списка зон: зоны идут сверху вниз, вторая и далее — ниже основной */
+.booking__grid.booking__grid--zones {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.booking__zone-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Каждая зона (основная и добавленные) — один и тот же вид: сетка мест как у основной */
+.booking__zone-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.booking__zone-grid .booking__seat {
+  min-height: 110px;
+  min-width: 88px;
+}
+
+.booking__zone-block--closed {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+}
+
+.booking__zone-name,
+.booking__zone-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.booking__zone-closed {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.booking__no-zones {
+  margin: 0;
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+.booking__seat {
+  min-height: 110px;
+  min-width: 88px;
+  background: linear-gradient(165deg, #22222c 0%, #1a1a22 100%);
+  border: 1px solid rgba(85, 130, 255, 0.22);
+  border-radius: 16px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: default;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.booking__seat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(85, 130, 255, 0.5), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.booking__seat:hover {
+  border-color: rgba(85, 130, 255, 0.5);
+  box-shadow: 0 0 24px rgba(85, 130, 255, 0.18), 0 4px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.booking__seat:hover::before {
+  opacity: 1;
+}
+
+.booking__seat--booked {
+  border-color: rgba(220, 100, 100, 0.35);
+  background: linear-gradient(165deg, rgba(45, 25, 28, 0.9) 0%, rgba(35, 18, 20, 0.95) 100%);
+  opacity: 0.92;
+}
+
+.booking__seat--booked:hover {
+  box-shadow: 0 0 18px rgba(220, 100, 100, 0.12);
+}
+
+.booking__seat-num {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  text-align: center;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.booking__seat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  flex: 1;
+}
+
+.booking__status {
+  font-size: 0.7rem;
+  color: #ff8a80;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.booking__time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+}
+
+.booking__seat-fio {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Кнопка «Забронировать» на карточке — внизу, на всю ширину, акцентная */
+.booking__btn {
+  width: 100%;
+  margin-top: auto;
+  padding: 10px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #5582FF 0%, #4568dc 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px rgba(85, 130, 255, 0.35);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.booking__btn:hover {
+  background: linear-gradient(135deg, #6b92ff 0%, #5582FF 100%);
+  box-shadow: 0 4px 18px rgba(85, 130, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.booking__btn--cancel {
+  width: 100%;
+  margin-top: auto;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  background: linear-gradient(135deg, rgba(180, 50, 50, 0.9) 0%, #9b2226 100%);
+  box-shadow: 0 2px 10px rgba(200, 80, 80, 0.3);
+  border-radius: 10px;
+}
+
+.booking__btn--cancel:hover {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 4px 14px rgba(220, 100, 100, 0.4);
+}
+
+.booking__sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: linear-gradient(160deg, #1e1e26 0%, #18181f 100%);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow:
+    0 0 0 1px rgba(85, 130, 255, 0.1),
+    0 0 40px rgba(85, 130, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(85, 130, 255, 0.18);
+}
+
+.booking__sidebar-title {
+  margin: 0 0 20px 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-shadow: 0 0 15px rgba(85, 130, 255, 0.4);
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(85, 130, 255, 0.2);
+}
+
+.booking__pc-placeholder {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.55;
+}
+
+.booking__pc-spec {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+}
+
+.booking__pc-spec:last-child {
+  margin-bottom: 0;
+}
+
+.booking__pc-spec strong {
+  color: #5582FF;
+}
+
+/* Модальное окно бронирования */
+#booking-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+
+#booking-modal.modal--hidden {
+  display: none;
+}
+
+#booking-modal .modal__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(6px);
+}
+
+#booking-modal .booking-modal__content {
+  position: relative;
+  background: linear-gradient(165deg, #22222c 0%, #1a1a22 100%);
+  border-radius: 22px;
+  padding: 0;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid rgba(85, 130, 255, 0.25);
+  box-shadow:
+    0 0 0 1px rgba(85, 130, 255, 0.08),
+    0 0 60px rgba(85, 130, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.booking-modal__header {
+  padding: 28px 28px 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(85, 130, 255, 0.12);
+}
+
+.booking-modal__badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 8px;
+}
+
+#booking-modal .modal__title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(85, 130, 255, 0.4);
+}
+
+.booking-modal__seat-num {
+  display: inline-block;
+  min-width: 2em;
+  padding: 4px 12px;
+  margin-left: 6px;
+  background: linear-gradient(135deg, rgba(85, 130, 255, 0.35) 0%, rgba(85, 130, 255, 0.2) 100%);
+  border-radius: 10px;
+  color: #5582FF;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(85, 130, 255, 0.25);
+}
+
+#booking-modal .modal__form {
+  padding: 24px 28px 28px;
+}
+
+#booking-modal .form-group {
+  margin-bottom: 24px;
+}
+
+#booking-modal .form-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+#booking-modal .form-group input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(85, 130, 255, 0.28);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#booking-modal .form-group input:focus {
+  outline: none;
+  border-color: #5582FF;
+  box-shadow: 0 0 18px rgba(85, 130, 255, 0.25);
+}
+
+#booking-modal .booking-time-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+#booking-modal .booking-time-row input {
+  flex: 1;
+  min-width: 0;
+}
+
+#booking-modal .booking-time-sep {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Выбор времени брони — два столбца и сводка */
+.booking-time-picker__title {
+  margin: 0 0 12px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.booking-time-picker__info {
+  margin: 0 0 12px 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.booking-time-picker--slots .booking-time-picker__list--single {
+  max-width: 100%;
+  width: 100%;
+  max-height: 220px;
+  margin-bottom: 14px;
+}
+
+.booking-time-picker__date-row {
+  margin-bottom: 12px;
+}
+
+.booking-time-picker__date-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.booking-time-picker__date-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(85, 130, 255, 0.28);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.booking-time-picker__date-input:focus {
+  outline: none;
+  border-color: #5582FF;
+}
+
+.booking-time-picker__duration {
+  margin: 0 0 16px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.booking-time-picker {
+  margin-bottom: 20px;
+}
+
+.booking-time-picker__columns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.booking-time-picker__col {
+  flex: 1;
+  max-width: 100px;
+  position: relative;
+}
+
+.booking-time-picker__list {
+  height: 176px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-snap-type: y mandatory;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 80%, transparent 100%);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.booking-time-picker__list::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.booking-time-picker__option {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+  cursor: pointer;
+  transition: color 0.2s, font-weight 0.2s;
+}
+
+.booking-time-picker__option:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.booking-time-picker__option--selected {
+  color: #fff;
+  font-weight: 700;
+}
+
+.booking-time-picker__summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 14px 16px;
+  background: rgba(40, 45, 60, 0.6);
+  border-radius: 14px;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+}
+
+.booking-time-picker__summary-date {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.booking-time-picker__summary-start,
+.booking-time-picker__summary-end {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.booking-time-picker__summary-sep {
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Кнопки модалки: Отмена слева, Забронировать справа и крупнее */
+.booking-modal__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.booking-modal__cancel {
+  padding: 12px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.2s ease;
+}
+
+.booking-modal__cancel:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.booking-modal__submit {
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #5582FF 0%, #4568dc 100%);
+  color: #fff;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 20px rgba(85, 130, 255, 0.4);
+  letter-spacing: 0.02em;
+}
+
+.booking-modal__submit:hover {
+  background: linear-gradient(135deg, #6b92ff 0%, #5582FF 100%);
+  box-shadow: 0 6px 24px rgba(85, 130, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.booking-modal__submit-text {
+  display: inline-block;
+}
+
+/* ==================== 8. Лидерборд: поиск, фильтры, таблица рейтинга ==================== */
+
+.leaderboard.leaderboard--hidden {
+  display: none;
+}
+
+.leaderboard {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.leaderboard__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.leaderboard__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 400px;
+  background: #252525;
+  border: 1px solid rgba(85, 130, 255, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  transition: box-shadow 0.2s;
+}
+
+.leaderboard__search:focus-within {
+  box-shadow: 0 0 15px rgba(85, 130, 255, 0.3);
+}
+
+.leaderboard__search-icon {
+  color: #5582FF;
+  flex-shrink: 0;
+}
+
+.leaderboard__search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.leaderboard__search-input::placeholder {
+  color: #666;
+}
+
+.leaderboard__filters {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: #252525;
+  border: 1px solid rgba(85, 130, 255, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.leaderboard__filters:hover {
+  border-color: #5582FF;
+  box-shadow: 0 0 15px rgba(85, 130, 255, 0.3);
+}
+
+.leaderboard__filter-icon {
+  color: #5582FF;
+}
+
+.leaderboard__table-wrap {
+  background: #252525;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.25), 0 0 60px rgba(85, 130, 255, 0.15);
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.leaderboard__table-wrap::-webkit-scrollbar {
+  width: 8px;
+}
+
+.leaderboard__table-wrap::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 4px;
+}
+
+.leaderboard__table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(85, 130, 255, 0.5);
+  border-radius: 4px;
+}
+
+.leaderboard__table-wrap::-webkit-scrollbar-thumb:hover {
+  background: rgba(85, 130, 255, 0.7);
+}
+
+.leaderboard__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard__th {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(18, 18, 28, 0.98);
+  border-bottom: 1px solid rgba(85, 130, 255, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.leaderboard__th--sortable {
+  cursor: pointer;
+}
+
+.leaderboard__th--sortable:hover {
+  color: #5582FF;
+}
+
+.leaderboard__sort {
+  margin-left: 4px;
+  opacity: 0.6;
+}
+
+.leaderboard__th--active .leaderboard__sort {
+  color: #5582FF;
+  opacity: 1;
+}
+
+.leaderboard__row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard__row:last-child {
+  border-bottom: none;
+}
+
+.leaderboard__row td {
+  padding: 16px 20px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+}
+
+.leaderboard__place {
+  width: 80px;
+}
+
+.leaderboard__medal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.leaderboard__medal--gold {
+  background: linear-gradient(135deg, #ffd700, #daa520);
+  color: #1a1a1a;
+}
+
+.leaderboard__medal--silver {
+  background: linear-gradient(135deg, #c0c0c0, #8c8c8c);
+  color: #1a1a1a;
+}
+
+.leaderboard__medal--bronze {
+  background: linear-gradient(135deg, #cd7f32, #8b4513);
+  color: #fff;
+}
+
+.leaderboard__student {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.leaderboard__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.leaderboard__coins {
+  color: #5582FF;
+  font-weight: 600;
+  text-shadow: 0 0 10px rgba(85, 130, 255, 0.5);
+}
+
+/* ==================== 14. Адаптив: планшеты, мобильные, мелкие экраны ==================== */
+
+/* Планшеты — шапка и подвал чуть компактнее */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header {
+    padding: 14px 20px;
+    padding-left: max(20px, env(safe-area-inset-left));
+    padding-right: max(20px, env(safe-area-inset-right));
+  }
+
+  .header__nav {
+    gap: 20px;
+  }
+
+  .header__link {
+    font-size: 0.95rem;
+  }
+
+  .footer {
+    padding: 20px 24px;
+    padding-left: max(24px, env(safe-area-inset-left));
+    padding-right: max(24px, env(safe-area-inset-right));
+  }
+
+  .footer__nav {
+    gap: 24px;
+  }
+
+  .footer__link {
+    font-size: 0.9rem;
+  }
+}
+
+/* Адаптив — мобильная версия (ПК-версия не меняется) */
+@media (max-width: 768px) {
+  html {
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    overflow-x: hidden;
+    min-width: 0;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .header {
+    flex-wrap: nowrap;
+    gap: 8px;
+    padding: 10px 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    position: relative;
+    min-height: 52px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+  .header__logo {
+    order: 1;
+    flex-shrink: 1;
+    min-width: 0;
+    display: block;
+  }
+
+  .header__logo img {
+    height: 32px;
+    max-width: 120px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .header__burger {
+    display: flex;
+    order: 2;
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    gap: 4px;
+    padding: 0;
+    background: rgba(85, 130, 255, 0.12);
+    border: 1px solid rgba(85, 130, 255, 0.3);
+    border-radius: 10px;
+  }
+
+  .header__burger .header__burger-line {
+    width: 16px;
+    height: 2px;
+  }
+
+  .header__burger[aria-expanded="true"] .header__burger-line:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  .header__burger[aria-expanded="true"] .header__burger-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .header__burger[aria-expanded="true"] .header__burger-line:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+
+  .header__nav {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    background: rgba(10, 10, 18, 0.98);
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 6px;
+    padding: max(60px, env(safe-area-inset-top)) 16px 24px;
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .header--menu-open {
+    z-index: 10000;
+  }
+
+  .header--menu-open .header__nav {
+    display: flex;
+  }
+
+  .header--menu-open .header__burger {
+    position: relative;
+    z-index: 10001;
+  }
+
+  .header__nav .header__link {
+    font-size: 1.05rem;
+    padding: 14px 20px;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid rgba(85, 130, 255, 0.25);
+    background: rgba(85, 130, 255, 0.08);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .header__nav .header__link:hover,
+  .header__nav .header__link:active {
+    background: rgba(85, 130, 255, 0.2);
+    border-color: rgba(85, 130, 255, 0.5);
+  }
+
+  .header__user-area {
+    order: 3;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  .header__user-block {
+    min-width: 0;
+    max-width: 100%;
+    gap: 8px;
+  }
+
+  .header__user-info {
+    min-width: 0;
+    align-items: flex-end;
+  }
+
+  .header__user-name {
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.85rem;
+  }
+
+  .header__user-coins {
+    font-size: 0.7rem;
+  }
+
+  .header__user-avatar-wrap,
+  .header__user-avatar-wrap.custom-frame--frame-gold,
+  .header__user-avatar-wrap.custom-frame--frame-neon,
+  .header__user-avatar-wrap.custom-frame--frame-silver,
+  .header__user-avatar-wrap.custom-frame--frame-rainbow {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .header__user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.75rem;
+  }
+
+  .header__logout {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+  }
+
+  .header__btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  body.body--menu-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .welcome-card {
+    padding: 24px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .welcome-card__inner {
+    padding: 32px 20px;
+    border-radius: 20px;
+  }
+
+  .welcome-card__icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+
+  .welcome-card__title {
+    font-size: 1.25rem;
+  }
+
+  .welcome-card__text {
+    font-size: 0.9rem;
+  }
+
+  .main {
+    padding: 20px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .block {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .block__title {
+    font-size: 1.05rem;
+  }
+
+  .block__text {
+    font-size: 0.9rem;
+  }
+
+  .tournaments {
+    padding: 20px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .tournaments__filter-row {
+    margin-bottom: 12px;
+  }
+
+  .tournaments__filter {
+    gap: 6px;
+  }
+
+  .tournaments__filter-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .tournaments__grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .event-card {
+    border-radius: 16px;
+  }
+
+  .event-card__title {
+    font-size: 0.95rem;
+    padding: 14px 44px 6px 14px;
+  }
+
+  .event-card__format {
+    top: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+  }
+
+  .event-card__image {
+    min-height: 120px;
+  }
+
+  .event-card__footer {
+    padding: 12px 14px;
+  }
+
+  .event-card__btn {
+    font-size: 0.9rem;
+  }
+
+  .leaderboard {
+    padding: 20px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .leaderboard__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .leaderboard__search {
+    max-width: none;
+  }
+
+  .leaderboard__table-wrap {
+    max-height: 340px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .leaderboard__table {
+    min-width: 280px;
+  }
+
+  .leaderboard__th,
+  .leaderboard__row td {
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+
+  .leaderboard__avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.6rem;
+  }
+
+  .achievements {
+    padding: 20px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .achievements__inner {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .achievements__title {
+    font-size: 1.2rem;
+  }
+
+  .achievements__sub {
+    font-size: 0.9rem;
+  }
+
+  .achievements__grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .achievements__card {
+    padding: 16px;
+  }
+
+  .exchange {
+    padding: 20px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .exchange__inner {
+    padding: 20px 16px;
+    border-radius: 18px;
+  }
+
+  .exchange__title {
+    font-size: 1.2rem;
+  }
+
+  .exchange__block-title {
+    font-size: 1rem;
+  }
+
+  .exchange__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .exchange-item {
+    padding: 12px 10px;
+  }
+
+  .exchange-item__preview {
+    width: 52px;
+    height: 52px;
+  }
+
+  .exchange-item__name {
+    font-size: 0.8rem;
+  }
+
+  .exchange-item__btn {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    padding: 20px 16px;
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .footer__logo {
+    display: block;
+  }
+
+  .footer__logo img {
+    height: 28px;
+    width: auto;
+  }
+
+  .footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px 24px;
+  }
+
+  .footer__link {
+    font-size: 0.9rem;
+  }
+
+  .footer__copy {
+    font-size: 0.8rem;
+    text-align: center;
+    line-height: 1.4;
+  }
+
+  .booking {
+    padding: 20px 12px 40px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    width: 100%;
+    min-width: 0;
+  }
+
+  .booking__hero {
+    padding: 16px 12px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+
+  .booking__hero-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .booking__title {
+    font-size: 1.2rem;
+  }
+
+  .booking__subtitle {
+    font-size: 0.85rem;
+  }
+
+  .booking__legend {
+    gap: 16px;
+  }
+
+  .booking__legend-item {
+    font-size: 0.8rem;
+  }
+
+  .booking__tabs {
+    margin-bottom: 14px;
+  }
+
+  .booking__tab {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+  }
+
+  .booking__layout {
+    flex-direction: column;
+  }
+
+  .booking__grid-wrap {
+    padding: 16px 12px;
+    border-radius: 16px;
+  }
+
+  .booking__grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .booking__seat {
+    min-height: 72px;
+    min-width: 0;
+    padding: 8px 6px;
+    border-radius: 12px;
+  }
+
+  .booking__seat-num {
+    font-size: 0.8rem;
+  }
+
+  .booking__btn {
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
+
+  .booking__sidebar {
+    width: 100%;
+    padding: 20px 16px;
+  }
+
+  #booking-modal {
+    padding: 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    align-items: flex-end;
+  }
+
+  .booking-modal__content {
+    margin: 0;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .booking-modal__actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .booking-modal__submit {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .booking-modal__cancel {
+    width: 100%;
+  }
+
+  .booking-time-picker__title {
+    font-size: 1rem;
+  }
+
+  .booking-time-picker__date-row {
+    margin-bottom: 10px;
+  }
+
+  .booking-time-picker__info {
+    font-size: 0.8rem;
+  }
+
+  .booking-time-picker__duration {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+  }
+
+  .booking-time-picker--slots .booking-time-picker__list--single {
+    max-height: 200px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .booking-time-picker__list {
+    height: auto;
+    min-height: 120px;
+  }
+
+  .booking-time-picker__option {
+    height: 44px;
+    font-size: 0.95rem;
+  }
+
+  .booking-time-picker__summary {
+    padding: 12px 14px;
+    gap: 6px 10px;
+  }
+
+  .booking-time-picker__summary-date {
+    font-size: 0.75rem;
+  }
+
+  .booking-time-picker__summary-start,
+  .booking-time-picker__summary-end {
+    font-size: 1.05rem;
+  }
+
+  .booking-modal__actions {
+    margin-top: 20px;
+  }
+
+  /* Схема зала — мобильная версия (красиво и адекватно) */
+  .booking__scheme {
+    max-height: 320px;
+    min-height: 240px;
+    aspect-ratio: 4/3;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(85, 130, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    background: linear-gradient(165deg, #1c2430 0%, #141a24 100%);
+  }
+
+  .booking__scheme-floor {
+    margin: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(85, 130, 255, 0.22);
+    background: linear-gradient(180deg, rgba(85, 130, 255, 0.1) 0%, rgba(85, 130, 255, 0.05) 100%);
+  }
+
+  .booking__scheme-zone-grid {
+    gap: 5px;
+    padding: 6px;
+  }
+
+  .booking__scheme-row-spacer {
+    min-height: 6px;
+  }
+
+  .booking__scheme-seat {
+    border-radius: 6px;
+    min-height: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .booking__scheme-seat:active {
+    transform: scale(0.97);
+  }
+
+  .booking__scheme-seat--booked {
+    border-radius: 6px;
+  }
+
+  .booking__scheme-seat-num {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .booking__scheme-seat-time {
+    display: none;
+  }
+
+  .booking__scheme-line {
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(85, 130, 255, 0.45), rgba(85, 130, 255, 0.55), rgba(85, 130, 255, 0.45), transparent);
+  }
+
+  .booking__scheme-entrance {
+    width: 11%;
+    max-width: 36px;
+    height: 44px;
+    font-size: 0.6rem;
+    border-radius: 8px 0 0 8px;
+    padding: 0 2px;
+    background: rgba(85, 130, 255, 0.2);
+    border: 1px solid rgba(85, 130, 255, 0.4);
+  }
+
+  .booking__scheme-entrance-arrow {
+    font-size: 0.85rem;
+    color: #5582FF;
+  }
+
+  .booking__scheme-entrance-text {
+    line-height: 1.1;
+  }
+
+  .booking__scheme-room-name {
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(85, 130, 255, 0.25);
+    border: 1px solid rgba(85, 130, 255, 0.45);
+    box-shadow: 0 1px 6px rgba(85, 130, 255, 0.2);
+  }
+
+  #tournament-modal {
+    padding: 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    align-items: flex-end;
+  }
+
+  .tournament-modal__box {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    max-height: 90dvh;
+    margin: 0;
+    border-radius: 20px 20px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .tournament-modal__close {
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+
+  .tournament-modal__hero {
+    min-height: 100px;
+    padding: 20px 16px 16px;
+  }
+
+  .tournament-modal__title {
+    font-size: 1.15rem;
+  }
+
+  .tournament-modal__body {
+    padding: 0 16px 20px;
+  }
+
+  .tournament-modal__section {
+    padding: 14px;
+  }
+
+  .tournament-match {
+    grid-template-columns: 44px 1fr 40px;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 0.8rem;
+  }
+
+  .tournament-match__team {
+    min-width: 0;
+  }
+
+  .tournament-match__team-label {
+    font-size: 0.65rem;
+  }
+
+  .tournament-match__team-players {
+    font-size: 0.75rem;
+  }
+}
+
+/* Узкие экраны — ещё компактнее шапка и подвал */
+@media (max-width: 480px) {
+  .header__user-name {
+    max-width: 56px;
+  }
+
+  .header__user-coins {
+    display: none;
+  }
+}
+
+/* Очень узкие экраны */
+@media (max-width: 380px) {
+  .header {
+    padding: 8px 10px;
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+  }
+
+  .header__logo img {
+    max-width: 100px;
+    height: 28px;
+  }
+
+  .header__burger {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  .header__user-info {
+    display: none;
+  }
+
+  .header__user-block {
+    gap: 6px;
+  }
+
+  .header__user-avatar-wrap,
+  .header__user-avatar-wrap.custom-frame--frame-gold,
+  .header__user-avatar-wrap.custom-frame--frame-neon,
+  .header__user-avatar-wrap.custom-frame--frame-silver,
+  .header__user-avatar-wrap.custom-frame--frame-rainbow {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header__user-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+
+  .header__logout {
+    width: 32px;
+    height: 32px;
+  }
+
+  .header__btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .footer {
+    padding: 16px 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  .footer__nav {
+    gap: 12px 20px;
+  }
+
+  .footer__copy {
+    font-size: 0.75rem;
+  }
+
+  .booking__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .booking__seat {
+    min-height: 68px;
+  }
+
+  .booking__scheme {
+    min-height: 220px;
+    max-height: 280px;
+  }
+
+  .booking__scheme-seat-num {
+    font-size: 0.65rem;
+  }
+
+  .booking__scheme-room-name {
+    font-size: 0.65rem;
+    padding: 3px 8px;
+  }
+
+  .exchange__grid {
+    gap: 8px;
+  }
+
+  .exchange-item__preview {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ==================== 9. Достижения: сетка значков, прогресс, награды ==================== */
+
+.achievements.achievements--hidden {
+  display: none;
+}
+
+.achievements {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.achievements__inner {
+  background: linear-gradient(145deg, #1e1e28 0%, #252530 100%);
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.15);
+}
+
+.achievements__title {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-shadow: 0 0 20px rgba(85, 130, 255, 0.4);
+}
+
+.achievements__sub {
+  margin: 0 0 24px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+.achievements__auth-msg {
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.achievements__auth-msg--hidden {
+  display: none;
+}
+
+.achievements__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.achievements__card {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+  position: relative;
+}
+
+.achievements__card--locked {
+  opacity: 0.75;
+  border-color: rgba(85, 130, 255, 0.1);
+}
+
+.achievements__card--unlocked {
+  border-color: rgba(85, 130, 255, 0.4);
+  box-shadow: 0 0 16px rgba(85, 130, 255, 0.2);
+}
+
+.achievements__card--rare.achievements__card--unlocked {
+  border-color: rgba(255, 193, 7, 0.5);
+  box-shadow: 0 0 20px rgba(255, 193, 7, 0.25);
+}
+
+.achievements__card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.achievements__card-title {
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.achievements__card-desc {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+.achievements__card-condition {
+  margin: 0 0 10px 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.achievements__card-reward {
+  color: #7cba7c;
+}
+
+.achievements__card-progress {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.achievements__card-progress-bar {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #5582FF, #7b9cff);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.achievements__card--unlocked .achievements__card-progress-bar {
+  background: linear-gradient(90deg, #5cb85c, #7cba7c);
+}
+
+.achievements__card-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #5cb85c;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.achievements__claim-btn {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(135deg, #5582FF, #4568dc);
+  color: #fff;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.achievements__claim-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(85, 130, 255, 0.4);
+}
+.achievements__claim-btn:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+/* ==================== 10. Обмен коинов: блоки товаров, превью, кнопки покупки ==================== */
+
+.exchange.exchange--hidden {
+  display: none;
+}
+
+.exchange {
+  flex: 1;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.exchange__inner {
+  background: linear-gradient(145deg, #1e1e28 0%, #252530 100%);
+  border-radius: 24px;
+  padding: 32px;
+  border: 1px solid rgba(85, 130, 255, 0.2);
+  box-shadow: 0 0 30px rgba(85, 130, 255, 0.15);
+}
+
+.exchange__title {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #5582FF;
+  text-shadow: 0 0 20px rgba(85, 130, 255, 0.4);
+}
+
+.exchange__sub {
+  margin: 0 0 24px 0;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.5;
+}
+
+.exchange__auth-msg {
+  padding: 24px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+}
+
+.exchange__auth-msg--hidden {
+  display: none;
+}
+
+.exchange__block {
+  margin-bottom: 32px;
+}
+
+.exchange__block:last-child {
+  margin-bottom: 0;
+}
+
+.exchange__block-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.exchange__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.exchange-item {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 14px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid rgba(85, 130, 255, 0.15);
+}
+
+.exchange-item__preview {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #353535;
+}
+
+.exchange-item__preview--banner {
+  border-radius: 12px;
+  width: 100%;
+  height: 48px;
+}
+
+.exchange-item__preview--gif {
+  border-radius: 12px;
+  width: 100%;
+  height: 48px;
+  background-size: cover;
+  background-position: center;
+  background-color: #1a1a2a;
+}
+
+.exchange-item__name {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.exchange-item__price {
+  margin: 0 0 10px 0;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.exchange-item__btn {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(85, 130, 255, 0.25) 0%, rgba(85, 130, 255, 0.12) 100%);
+  border: 1px solid rgba(85, 130, 255, 0.5);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 0 12px rgba(85, 130, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.exchange-item__btn:hover:not(:disabled) {
+  border-color: rgba(85, 130, 255, 0.8);
+  box-shadow: 0 0 18px rgba(85, 130, 255, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(85, 130, 255, 0.35) 0%, rgba(85, 130, 255, 0.18) 100%);
+  transform: translateY(-1px);
+}
+
+.exchange-item__btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 0 8px rgba(85, 130, 255, 0.25);
+}
+
+.exchange-item__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: none;
+  background: rgba(40, 40, 55, 0.6);
+}
+
+/* --- Превью рамок и баннеров в блоке обмена (кастомизация) --- */
+.custom-frame--frame-none { border: 2px solid rgba(255,255,255,0.2); }
+.custom-frame--frame-gold { border: 3px solid #d4af37; box-shadow: 0 0 12px rgba(212,175,55,0.6); }
+.custom-frame--frame-neon { border: 3px solid #5582FF; box-shadow: 0 0 15px rgba(85,130,255,0.8); }
+.custom-frame--frame-silver { border: 3px solid #c0c0c0; box-shadow: 0 0 10px rgba(192,192,192,0.5); }
+.custom-frame--frame-rainbow { border: 3px solid transparent; background: linear-gradient(white, white) padding-box, linear-gradient(90deg, #ff0000, #ff8800, #ffff00, #00ff00, #00ffff, #0088ff, #8800ff) border-box; border-radius: 50%; }
+
+.custom-banner--banner-none { background: #2a2a2a; }
+.custom-banner--banner-blue { background: linear-gradient(135deg, #1a237e 0%, #5582FF 50%, #0d47a1 100%); }
+.custom-banner--banner-purple { background: linear-gradient(135deg, #4a148c 0%, #7c4dff 50%, #311b92 100%); }
+.custom-banner--banner-fire { background: linear-gradient(135deg, #bf360c 0%, #ff9800 50%, #ff5722 100%); }
+.custom-banner--banner-cyber { background: linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%); background-image: linear-gradient(rgba(85,130,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(85,130,255,0.15) 1px, transparent 1px); background-size: 12px 12px; }
+.custom-banner--banner-gif { background: #1a1a2a; background-size: cover; background-position: center; }
+.exchange-item__preview--banner.custom-banner--banner-gif { position: relative; }
+.exchange-item__preview--banner.custom-banner--banner-gif::after {
+  content: 'GIF';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ==================== 11. Подвал: логотип, навигация, копирайт ==================== */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 24px 32px;
+  padding-left: max(24px, env(safe-area-inset-left));
+  padding-right: max(24px, env(safe-area-inset-right));
+  background: #1a1a1a;
+  border-top: 1px solid #353535;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.footer__logo img {
+  height: 32px;
+  width: auto;
+}
+
+.footer__nav {
+  display: flex;
+  gap: 32px;
+}
+
+.footer__link {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.footer__link:hover {
+  color: rgba(255, 255, 255, 1);
+}
+
+.footer__copy {
+  margin: 0;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer__link--hidden {
+  display: none;
+}
