@@ -13,19 +13,11 @@ var bookingGrid = document.getElementById('booking-grid');
 var tournamentsFilterCategory = '';
 var tournamentsFilterFormat = '';
 
+let currentTournaments = [];
+let currentComputers = [];
+
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
 initStorage();
-// Синхронизация пользователя: если вход был через forma-signin.js (current_user), копируем в kiber_arena_current_user
-if (!getCurrentUser()) {
-    try {
-        var stored = localStorage.getItem('current_user');
-        if (stored) {
-            var u = JSON.parse(stored);
-            if (u && u.email) setCurrentUser(u);
-        }
-    } catch (e) {}
-}
-renderTournaments();
 renderHeaderUser();
 
 // Проверяем авторизацию
@@ -63,20 +55,17 @@ async function checkAdminStatus() {
         const userFromDB = users.find(u => u.email === user.email);
         
         if (userFromDB && userFromDB.is_admin) {
-            // Обновляем статус админа в текущем пользователе
             const currentUser = getCurrentUser();
             if (currentUser) {
                 currentUser.is_admin = true;
                 setCurrentUser(currentUser);
             }
             
-            // Показываем ссылку на админку
             const adminLink = document.getElementById('admin-link');
             if (adminLink) adminLink.classList.remove('footer__link--hidden');
             
             return true;
         } else {
-            // Скрываем ссылку на админку
             const adminLink = document.getElementById('admin-link');
             if (adminLink) adminLink.classList.add('footer__link--hidden');
             
@@ -100,10 +89,7 @@ async function loadLeaderboardFromDB() {
     
     try {
         const baseUrl = window.location.origin;
-        console.log('📤 Запрос к:', `${baseUrl}/api/leaderboard`);
-        
         const response = await fetch(`${baseUrl}/api/leaderboard`);
-        console.log('📥 Статус ответа:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -127,7 +113,6 @@ async function loadLeaderboardFromDB() {
                     medalHtml = place;
                 }
                 
-                // Получаем инициалы из ФИО
                 const nameParts = user.student ? user.student.split(' ') : [];
                 let initials = '?';
                 if (nameParts.length >= 2) {
@@ -149,12 +134,209 @@ async function loadLeaderboardFromDB() {
             console.log('✅ Лидерборд обновлен');
         } else {
             leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px;">Нет данных для отображения</td></tr>';
-            console.log('ℹ️ Нет данных для отображения');
         }
     } catch (error) {
         console.error('❌ Ошибка загрузки лидерборда:', error);
-        leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #ff4444;">Ошибка загрузки данных. Проверьте подключение к серверу.</td></tr>';
+        leaderboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 40px; color: #ff4444;">Ошибка загрузки данных</td></tr>';
     }
+}
+
+// ==================== НОВАЯ ФУНКЦИЯ: ЗАГРУЗКА КОМПЬЮТЕРОВ ====================
+async function loadComputersFromDB() {
+    console.log('🟢 Загрузка компьютеров...');
+    
+    try {
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/computers`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        currentComputers = await response.json();
+        console.log('📊 Получены компьютеры:', currentComputers);
+        
+        // Обновляем отображение бронирования
+        renderBookingFromDB();
+    } catch (error) {
+        console.error('❌ Ошибка загрузки компьютеров:', error);
+    }
+}
+
+// ==================== НОВАЯ ФУНКЦИЯ: ОТОБРАЖЕНИЕ БРОНИРОВАНИЯ ====================
+function renderBookingFromDB() {
+    if (!bookingGrid) return;
+    
+    const user = getCurrentUser();
+    
+    bookingGrid.innerHTML = currentComputers.map(comp => {
+        const isBooked = comp.is_booked;
+        const seatId = comp.seat_number;
+        const bookedByUser = isBooked && user && comp.booked_by_email === user.email;
+        
+        let statusHtml = '';
+        if (isBooked) {
+            statusHtml = `
+                <div class="booking__seat-content">
+                    <span class="booking__status">Занято</span>
+                    <span class="booking__time">${comp.booking_time || '—'}</span>
+                    ${bookedByUser ? 
+                        `<button type="button" class="booking__btn booking__btn--cancel" data-cancel-seat="${seatId}">Отмена</button>` : 
+                        ''}
+                </div>
+            `;
+        } else {
+            statusHtml = `<button type="button" class="booking__btn" data-seat="${seatId}">Бронь</button>`;
+        }
+        
+        return `<div class="booking__seat ${isBooked ? 'booking__seat--booked' : ''}" data-seat="${seatId}">
+            <span class="booking__seat-num">${seatId}</span>
+            ${statusHtml}
+        </div>`;
+    }).join('');
+    
+    // Добавляем обработчики
+    bookingGrid.querySelectorAll('.booking__btn[data-seat]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!getCurrentUser()) {
+                alert('Для бронирования необходимо зарегистрироваться');
+                return;
+            }
+            openBookingModal(parseInt(btn.dataset.seat));
+        });
+    });
+    
+    bookingGrid.querySelectorAll('.booking__btn[data-cancel-seat]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!getCurrentUser()) {
+                alert('Для отмены бронирования необходимо войти в аккаунт');
+                return;
+            }
+            cancelBooking(parseInt(btn.dataset.cancelSeat));
+        });
+    });
+}
+
+// ==================== НОВАЯ ФУНКЦИЯ: БРОНИРОВАНИЕ ====================
+async function createBooking(seatId, time) {
+    const user = getCurrentUser();
+    if (!user) {
+        alert('Войдите в аккаунт');
+        return;
+    }
+    
+    const today = new Date().toISOString().split('T')[0];
+    
+    try {
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/computers/${seatId}/book`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                seat_id: seatId,
+                user_email: user.email,
+                user_name: user.fio,
+                date: today,
+                time: time
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification(`✅ Компьютер ${seatId} забронирован`, 'success');
+            loadComputersFromDB(); // Перезагружаем список
+            closeBookingModal();
+        } else {
+            showNotification(`❌ ${data.detail || 'Ошибка бронирования'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('❌ Ошибка подключения к серверу', 'error');
+    }
+}
+
+// ==================== НОВАЯ ФУНКЦИЯ: ОТМЕНА БРОНИРОВАНИЯ ====================
+async function cancelBooking(seatId) {
+    const user = getCurrentUser();
+    if (!user) {
+        alert('Войдите в аккаунт');
+        return;
+    }
+    
+    try {
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/computers/${seatId}/unbook?email=${encodeURIComponent(user.email)}`, {
+            method: 'DELETE'
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification(`✅ Бронь компьютера ${seatId} отменена`, 'success');
+            loadComputersFromDB(); // Перезагружаем список
+        } else {
+            showNotification(`❌ ${data.detail || 'Ошибка отмены'}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showNotification('❌ Ошибка подключения к серверу', 'error');
+    }
+}
+
+// ==================== НОВАЯ ФУНКЦИЯ: ЗАГРУЗКА ТУРНИРОВ ====================
+async function loadTournamentsFromDB() {
+    console.log('🟢 Загрузка турниров...');
+    
+    try {
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/tournaments`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        currentTournaments = await response.json();
+        console.log('📊 Получены турниры:', currentTournaments);
+        
+        renderTournamentsFromDB();
+    } catch (error) {
+        console.error('❌ Ошибка загрузки турниров:', error);
+        if (tournamentsGrid) {
+            tournamentsGrid.innerHTML = '<p class="error-message">Ошибка загрузки турниров</p>';
+        }
+    }
+}
+
+// ==================== НОВАЯ ФУНКЦИЯ: ОТОБРАЖЕНИЕ ТУРНИРОВ ====================
+function renderTournamentsFromDB() {
+    if (!tournamentsGrid) return;
+    
+    const user = getCurrentUser();
+    
+    tournamentsGrid.innerHTML = currentTournaments.map(ev => {
+        const imgStyle = ev.image ? `background-image: url('${ev.image.replace(/'/g, "\\'")}')` : '';
+        const isRegistered = false; // Позже добавим проверку регистрации
+        
+        return `<article class="event-card" data-id="${ev.id}">
+            <h3 class="event-card__title">${ev.name || 'Мероприятие'}</h3>
+            <span class="event-card__format event-card__format--${ev.format || '1v1'}">${ev.format || '1v1'}</span>
+            <div class="event-card__image" style="${imgStyle}"></div>
+            <div class="event-card__footer">
+                <button type="button" class="event-card__btn event-card__btn--right" data-event-id="${ev.id}" data-action="details">Подробнее</button>
+            </div>
+        </article>`;
+    }).join('');
+    
+    tournamentsGrid.querySelectorAll('[data-action="details"]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const ev = currentTournaments.find(e => e.id === btn.dataset.eventId);
+            if (ev) openTournamentModal(ev);
+        });
+    });
 }
 
 // ==================== ФУНКЦИИ НАВИГАЦИИ ====================
@@ -183,10 +365,7 @@ function renderHeaderUser() {
         var cust = typeof getUserCustomization === 'function' ? getUserCustomization(user.email || '') : {};
         var frameClass = ' custom-frame custom-frame--' + (cust.equippedFrame || 'frame-none');
         
-        // Получаем актуальные коины пользователя
         var userCoins = user.arcoins || 100;
-        
-        // Проверяем, админ ли пользователь
         var adminBadge = user.is_admin ? ' <span style="color: #ffd700; font-size: 0.8rem;">(админ)</span>' : '';
         
         area.innerHTML = '<a href="kiber-profile/kiber-profile.html" class="header__user-block">' +
@@ -265,14 +444,7 @@ document.getElementById('nav-booking').addEventListener('click', function(e) {
     tournamentsContent.classList.add('tournaments--hidden');
     if (exchangeContent) exchangeContent.classList.add('exchange--hidden');
     bookingContent.classList.remove('booking--hidden');
-    renderBooking();
-});
-
-// После возврата из админки (добавили зону) — обновить список бронирования, если открыта эта вкладка
-document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'visible' && bookingContent && !bookingContent.classList.contains('booking--hidden')) {
-        renderBooking();
-    }
+    loadComputersFromDB();
 });
 
 document.getElementById('nav-tournaments').addEventListener('click', function(e) {
@@ -284,7 +456,7 @@ document.getElementById('nav-tournaments').addEventListener('click', function(e)
     bookingContent.classList.add('booking--hidden');
     if (exchangeContent) exchangeContent.classList.add('exchange--hidden');
     tournamentsContent.classList.remove('tournaments--hidden');
-    renderTournaments();
+    loadTournamentsFromDB();
 });
 
 // ==================== ФИЛЬТРЫ ТУРНИРОВ ====================
@@ -296,7 +468,7 @@ if (tournamentsFilter) {
         tournamentsFilter.querySelectorAll('.tournaments__filter-btn').forEach(function(b) { b.classList.remove('tournaments__filter-btn--active'); });
         btn.classList.add('tournaments__filter-btn--active');
         tournamentsFilterCategory = btn.dataset.category || '';
-        renderTournaments();
+        // Фильтрация будет позже
     });
 }
 var tournamentsFilterFormatEl = document.getElementById('tournaments-filter-format');
@@ -307,7 +479,7 @@ if (tournamentsFilterFormatEl) {
         tournamentsFilterFormatEl.querySelectorAll('.tournaments__filter-btn').forEach(function(b) { b.classList.remove('tournaments__filter-btn--active'); });
         btn.classList.add('tournaments__filter-btn--active');
         tournamentsFilterFormat = btn.dataset.format || '';
-        renderTournaments();
+        // Фильтрация будет позже
     });
 }
 
@@ -382,7 +554,6 @@ function renderAchievements() {
     var list = typeof ACHIEVEMENTS_LIST !== 'undefined' ? ACHIEVEMENTS_LIST : [];
     grid.innerHTML = list.map(function(a) {
         var unlocked = (data.unlocked || []).indexOf(a.id) !== -1;
-        var rewardClaimed = !!(data.rewardedCoins && data.rewardedCoins[a.id]);
         var current = typeof getAchievementProgressValue === 'function' ? getAchievementProgressValue(user.email, a.condition.type) : 0;
         var target = a.condition.value;
         var label = achievementConditionLabels[a.condition.type] || a.condition.type;
@@ -390,131 +561,19 @@ function renderAchievements() {
         var rewardText = a.rewardCoins ? ' +' + a.rewardCoins + ' ARcoins' : '';
         var cardClass = 'achievements__card' + (unlocked ? ' achievements__card--unlocked' : ' achievements__card--locked');
         var rareClass = a.rare ? ' achievements__card--rare' : '';
-        var badgeOrBtn = '';
-        if (unlocked) {
-            if (a.rewardCoins && a.rewardCoins > 0) {
-                if (rewardClaimed) {
-                    badgeOrBtn = '<span class="achievements__card-badge">Награда получена</span>';
-                } else {
-                    badgeOrBtn = '<button type="button" class="achievements__claim-btn admin-btn admin-btn--primary" data-achievement-id="' + a.id + '">Получить награду (' + a.rewardCoins + ' ARcoins)</button>';
-                }
-            } else {
-                badgeOrBtn = '<span class="achievements__card-badge">Получено</span>';
-            }
-        }
         return '<article class="' + cardClass + rareClass + '" data-id="' + a.id + '">' +
             '<div class="achievements__card-icon">' + (a.icon || '🏅') + '</div>' +
             '<h3 class="achievements__card-title">' + (a.name || '') + '</h3>' +
             '<p class="achievements__card-desc">' + (a.description || '') + '</p>' +
             '<p class="achievements__card-condition">' + label + ': ' + progressText + (rewardText ? ' <span class="achievements__card-reward">' + rewardText + '</span>' : '') + '</p>' +
             '<div class="achievements__card-progress"><span class="achievements__card-progress-bar" style="width:' + Math.min(100, (current / target) * 100) + '%"></span></div>' +
-            badgeOrBtn +
+            (unlocked ? '<span class="achievements__card-badge">Получено</span>' : '') +
             '</article>';
     }).join('');
-    grid.querySelectorAll('.achievements__claim-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var aid = btn.dataset.achievementId;
-            if (!aid || !user || !user.email) return;
-            btn.disabled = true;
-            var baseUrl = window.location.origin;
-            fetch(baseUrl + '/api/achievement-claim', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: user.email, achievement_id: aid })
-            }).then(function(res) { return res.json().then(function(body) { return { ok: res.ok, status: res.status, body: body }; }); }).then(function(r) {
-                if (r.ok && r.body.success) {
-                    user.arcoins = r.body.new_balance;
-                    setCurrentUser(user);
-                    if (typeof setAchievementRewardClaimed === 'function') setAchievementRewardClaimed(user.email, aid);
-                    renderAchievements();
-                    renderHeaderUser();
-                } else {
-                    if (r.body.detail === 'Награда уже получена' && typeof setAchievementRewardClaimed === 'function') {
-                        setAchievementRewardClaimed(user.email, aid);
-                        renderAchievements();
-                    } else {
-                        alert(r.body.detail || 'Не удалось получить награду');
-                    }
-                    btn.disabled = false;
-                }
-            }).catch(function(err) {
-                console.error(err);
-                alert('Ошибка соединения с сервером');
-                btn.disabled = false;
-            });
-        });
-    });
 }
 
-// ==================== ТУРНИРЫ ====================
+// ==================== ТУРНИРЫ (МОДАЛЬНЫЕ ОКНА) ====================
 var tournamentModalEventId = null;
-
-function renderTournaments() {
-    var events = getEvents();
-    var user = getCurrentUser();
-    var filtered = events.filter(function(ev) {
-        if (tournamentsFilterCategory && (ev.category || '') !== tournamentsFilterCategory) return false;
-        if (tournamentsFilterFormat && (ev.format || '1v1') !== tournamentsFilterFormat) return false;
-        return true;
-    });
-    if (!tournamentsGrid) return;
-    tournamentsGrid.innerHTML = filtered.map(function(ev) {
-        var imgStyle = ev.image ? 'background-image: url(\'' + ev.image.replace(/'/g, "\\'") + '\')' : '';
-        var regs = typeof getRegistrationsForEvent === 'function' ? getRegistrationsForEvent(ev.id) : [];
-        var isRegistered = user && user.email && regs.indexOf(user.email) !== -1;
-        var max = ev.maxParticipants || 999;
-        var isFull = regs.length >= max;
-        var format = ev.format || '1v1';
-        var leftBtnText = isRegistered ? 'Отменить запись' : isFull ? 'Мест нет' : 'Записаться';
-        var leftBtnClass = 'event-card__btn event-card__btn--left' + (isRegistered ? ' event-card__btn--registered' : '') + (isFull && !isRegistered ? ' event-card__btn--disabled' : '');
-        return '<article class="event-card" data-id="' + ev.id + '">' +
-            '<h3 class="event-card__title">' + (ev.name || 'Мероприятие') + '</h3>' +
-            '<span class="event-card__format event-card__format--' + format + '">' + format + '</span>' +
-            '<div class="event-card__image" style="' + imgStyle + '"></div>' +
-            '<div class="event-card__footer">' +
-            '<button type="button" class="' + leftBtnClass + '" data-event-id="' + ev.id + '" data-action="' + (isRegistered ? 'unregister' : 'register') + '"' + (isFull && !isRegistered ? ' disabled' : '') + '>' + leftBtnText + '</button>' +
-            '<button type="button" class="event-card__btn event-card__btn--right" data-event-id="' + ev.id + '" data-action="details">Подробнее</button>' +
-            '</div></article>';
-    }).join('');
-
-    tournamentsGrid.querySelectorAll('[data-action="register"]').forEach(function(btn) {
-        if (btn.disabled) return;
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var eventId = btn.dataset.eventId;
-            if (!getCurrentUser()) {
-                alert('Для регистрации на турнир необходимо войти в аккаунт.');
-                return;
-            }
-            if (typeof registerForTournament === 'function') {
-                registerForTournament(getCurrentUser().email, eventId);
-                if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(getCurrentUser().email);
-                renderTournaments();
-                if (tournamentModalEventId === eventId) fillTournamentModal(getEvents().find(function(ev) { return ev.id === eventId; }));
-            }
-        });
-    });
-    tournamentsGrid.querySelectorAll('[data-action="unregister"]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var eventId = btn.dataset.eventId;
-            var user = getCurrentUser();
-            if (!user) return;
-            if (typeof unregisterFromTournament === 'function') {
-                unregisterFromTournament(user.email, eventId);
-                renderTournaments();
-                if (tournamentModalEventId === eventId) fillTournamentModal(getEvents().find(function(ev) { return ev.id === eventId; }));
-            }
-        });
-    });
-    tournamentsGrid.querySelectorAll('[data-action="details"]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            var ev = getEvents().find(function(e) { return e.id === btn.dataset.eventId; });
-            if (ev) openTournamentModal(ev);
-        });
-    });
-}
 
 function openTournamentModal(ev) {
     tournamentModalEventId = ev.id;
@@ -529,28 +588,26 @@ function closeTournamentModal() {
     if (modal) modal.classList.add('modal--hidden');
 }
 
-function getUserNameByEmail(email) {
-    var users = typeof getUsers === 'function' ? getUsers() : [];
-    var u = users.find(function(x) { return x.email === email; });
-    return (u && u.fio) ? u.fio : email || '—';
-}
-
 function fillTournamentModal(ev) {
     if (!ev) return;
+    
     document.getElementById('tournament-modal-title').textContent = ev.name || 'Турнир';
     var meta = [ev.date, ev.time].filter(Boolean).join(' · ');
     document.getElementById('tournament-modal-meta').textContent = meta || 'Дата и время уточняются';
     document.getElementById('tournament-modal-desc').textContent = ev.description || 'Описание турнира.';
+    
     var catEl = document.getElementById('tournament-modal-category');
     if (catEl) {
         catEl.textContent = ev.category || '';
         catEl.style.display = ev.category ? 'inline-block' : 'none';
     }
+    
     var fmtEl = document.getElementById('tournament-modal-format');
     if (fmtEl) {
         fmtEl.textContent = ev.format || '';
         fmtEl.style.display = ev.format ? 'inline-block' : 'none';
     }
+    
     var heroBg = document.getElementById('tournament-modal-hero-bg');
     if (heroBg) {
         if (ev.image) {
@@ -563,426 +620,127 @@ function fillTournamentModal(ev) {
     }
 
     var user = getCurrentUser();
-    var regs = typeof getRegistrationsForEvent === 'function' ? getRegistrationsForEvent(ev.id) : [];
-    var isRegistered = user && regs.indexOf(user.email) !== -1;
     var max = ev.maxParticipants || 999;
-    var isFull = regs.length >= max;
 
     var statusEl = document.getElementById('tournament-modal-reg-status');
-    statusEl.textContent = 'Записано: ' + regs.length + ' / ' + max + (isRegistered ? ' (вы в списке)' : '');
+    statusEl.textContent = 'Макс. участников: ' + max;
 
     var regBtn = document.getElementById('tournament-modal-reg-btn');
-    regBtn.textContent = isRegistered ? 'Отменить запись' : (isFull ? 'Мест нет' : 'Записаться');
-    regBtn.disabled = !user || isFull && !isRegistered;
-    regBtn.classList.toggle('tournament-modal__btn--danger', isRegistered);
+    regBtn.textContent = 'Записаться';
+    regBtn.disabled = !user;
     regBtn.onclick = function() {
-        if (!user) { alert('Войдите в аккаунт.'); return; }
-        if (isRegistered && typeof unregisterFromTournament === 'function') {
-            unregisterFromTournament(user.email, ev.id);
-        } else if (!isRegistered && typeof registerForTournament === 'function' && !isFull) {
-            registerForTournament(user.email, ev.id);
-            if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
+        if (!user) { 
+            alert('Войдите в аккаунт.'); 
+            return; 
         }
-        fillTournamentModal(ev);
-        renderTournaments();
+        alert('Функция регистрации будет добавлена позже');
     };
 
-    var matches = typeof getMatchesForEvent === 'function' ? getMatchesForEvent(ev.id) : [];
-    if (matches.length === 0 && typeof ensureDefaultMatchesForEvent === 'function') {
-        matches = ensureDefaultMatchesForEvent(ev.id);
-    }
-    var format = ev.format || '1v1';
-    var isTeamFormat = format === '3v3' || format === '5v5';
-    var matchesHtml;
-    if (matches.length === 0) {
-        matchesHtml = '<p class="tournament-matches-empty">Матчи появятся после формирования сетки</p>';
-    } else if (isTeamFormat) {
-        matchesHtml = matches.map(function(m) {
-            var team1 = m.team1 || [];
-            var team2 = m.team2 || [];
-            var teamName1 = typeof getTeamNameForMemberEmails === 'function' ? getTeamNameForMemberEmails(team1) : null;
-            var teamName2 = typeof getTeamNameForMemberEmails === 'function' ? getTeamNameForMemberEmails(team2) : null;
-            var display1 = teamName1 || team1.map(function(e) { return e ? getUserNameByEmail(e) : 'TBD'; }).join(', ');
-            var display2 = teamName2 || team2.map(function(e) { return e ? getUserNameByEmail(e) : 'TBD'; }).join(', ');
-            var score = (m.score1 != null && m.score2 != null) ? (m.score1 + ' : ' + m.score2) : '—';
-            return '<div class="tournament-match tournament-match--team">' +
-                '<span class="tournament-match__num">Матч ' + m.id + '</span>' +
-                '<div class="tournament-match__teams">' +
-                '<div class="tournament-match__team"><span class="tournament-match__team-label">' + (teamName1 ? '' : 'Команда 1') + '</span><span class="tournament-match__team-players">' + (teamName1 || display1) + '</span></div>' +
-                '<span class="tournament-match__vs">—</span>' +
-                '<div class="tournament-match__team"><span class="tournament-match__team-label">' + (teamName2 ? '' : 'Команда 2') + '</span><span class="tournament-match__team-players">' + (teamName2 || display2) + '</span></div>' +
-                '</div>' +
-                '<span class="tournament-match__score">' + score + '</span></div>';
-        }).join('');
-    } else {
-        matchesHtml = matches.map(function(m) {
-            var p1 = m.player1 ? getUserNameByEmail(m.player1) : 'TBD';
-            var p2 = m.player2 ? getUserNameByEmail(m.player2) : 'TBD';
-            var score = (m.score1 != null && m.score2 != null) ? (m.score1 + ' : ' + m.score2) : '—';
-            return '<div class="tournament-match"><span class="tournament-match__num">Матч ' + m.id + '</span><span class="tournament-match__vs">' + p1 + ' — ' + p2 + '</span><span class="tournament-match__score">' + score + '</span></div>';
-        }).join('');
-    }
-    document.getElementById('tournament-modal-matches').innerHTML = matchesHtml;
-
-    var results = typeof getResultsForEvent === 'function' ? getResultsForEvent(ev.id) : [];
+    document.getElementById('tournament-modal-matches').innerHTML = '<p class="tournament-matches-empty">Матчи появятся после начала турнира</p>';
+    
     var tbody = document.querySelector('#tournament-modal-results tbody');
-    var resultsEmpty = document.getElementById('tournament-modal-results-empty');
-    if (tbody) {
-        tbody.innerHTML = results.length ? results.map(function(r) {
-            return '<tr><td>' + (r.place || '—') + '</td><td>' + (r.name || getUserNameByEmail(r.userEmail || '')) + '</td></tr>';
-        }).join('') : '';
-    }
-    if (resultsEmpty) resultsEmpty.style.display = results.length ? 'none' : 'block';
-
-    var rewards = ev.rewards || [];
-    document.getElementById('tournament-modal-rewards').innerHTML = rewards.length ? rewards.map(function(r) {
-        return '<li class="tournament-reward-item"><span class="tournament-reward-place">' + r.place + ' место</span> — ' + (r.text || '') + '</li>';
-    }).join('') : '<li>Награды уточняются</li>';
+    if (tbody) tbody.innerHTML = '';
+    document.getElementById('tournament-modal-results-empty').style.display = 'block';
+    
+    document.getElementById('tournament-modal-rewards').innerHTML = '<li>Награды уточняются</li>';
 }
 
 document.getElementById('tournament-modal-close').addEventListener('click', closeTournamentModal);
 document.querySelector('.tournament-modal__backdrop').addEventListener('click', closeTournamentModal);
 
-// ==================== БРОНИРОВАНИЕ ====================
-function getBookingScheme() {
-    return (typeof BOOKING_SCHEME !== 'undefined' && BOOKING_SCHEME.zones && BOOKING_SCHEME.zones.length)
-        ? BOOKING_SCHEME
-        : { zones: [{ id: 'hall', rows: 4, cols: 7, startSeatId: 1, x: 10, y: 15, width: 80, height: 70 }] };
-}
-
-function renderBooking() {
-    if (!bookingGrid) return;
-    // Всегда читаем схему из localStorage заново (зоны сохраняются в админке в тот же localStorage)
-    var scheme = getBookingScheme();
-    var zones = scheme.zones || [];
-    if (!zones.length) return;
-    var bookings = getBookings();
-    var html = '';
-    zones.forEach(function(zone) {
-        var zoneId = zone.id || 'hall';
-        var zoneName = zone.name || zoneId;
-        var rows = zone.rows || 5;
-        var cols = zone.cols || 7;
-        var startSeatId = zone.startSeatId || 1;
-        html += '<div class="booking__zone-block">';
-        html += '<h3 class="booking__zone-title">' + (zoneName.replace(/</g, '&lt;')) + '</h3>';
-        html += '<div class="booking__zone-grid" style="grid-template-columns:repeat(' + cols + ', minmax(88px, 1fr))">';
-        for (var row = 0; row < rows; row++) {
-            for (var col = 0; col < cols; col++) {
-                var seatId = startSeatId + row * cols + col;
-                var key = typeof getBookingKey === 'function' ? getBookingKey(zoneId, seatId) : seatId;
-                var booking = bookings[key];
-                var isBooked = !!booking;
-                var cls = 'booking__seat' + (isBooked ? ' booking__seat--booked' : '');
-                var status;
-                if (isBooked) {
-                    var curUser = getCurrentUser();
-                    var isOwner = curUser && (curUser.email === booking.userEmail);
-                    var fioEsc = (booking.userFio || booking.userEmail || '').replace(/</g, '&lt;').replace(/"/g, '&quot;');
-                    var cancelBtn = isOwner ? '<button type="button" class="booking__btn booking__btn--cancel" data-zone-id="' + (zoneId.replace(/"/g, '&quot;')) + '" data-cancel-seat="' + seatId + '">Отмена</button>' : '';
-                    status = '<div class="booking__seat-content"><span class="booking__status">Место забронировано</span><span class="booking__seat-fio">' + fioEsc + '</span><span class="booking__time">' + (booking.time || '') + '</span>' + cancelBtn + '</div>';
-                } else {
-                    status = '<button type="button" class="booking__btn" data-zone-id="' + (zoneId.replace(/"/g, '&quot;')) + '" data-seat="' + seatId + '">Бронь</button>';
-                }
-                html += '<div class="' + cls + '" data-zone-id="' + (zoneId.replace(/"/g, '&quot;')) + '" data-seat="' + seatId + '">' +
-                    '<span class="booking__seat-num">' + seatId + '</span>' + status + '</div>';
-            }
-        }
-        html += '</div></div>';
-    });
-    bookingGrid.classList.add('booking__grid--zones');
-    bookingGrid.style.display = 'flex';
-    bookingGrid.style.flexDirection = 'column';
-    bookingGrid.style.gap = zones.length > 1 ? '32px' : '0';
-    bookingGrid.style.gridTemplateColumns = '';
-    bookingGrid.innerHTML = html;
-    bookingGrid.querySelectorAll('.booking__btn[data-seat]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (!getCurrentUser()) {
-                alert('Для бронирования необходимо зарегистрироваться');
-                return;
-            }
-            openBookingModal(btn.dataset.zoneId || 'hall', parseInt(btn.dataset.seat, 10));
-        });
-    });
-    bookingGrid.querySelectorAll('.booking__btn[data-cancel-seat]').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (!getCurrentUser()) {
-                alert('Для отмены бронирования необходимо войти в аккаунт');
-                return;
-            }
-            cancelBooking(btn.dataset.zoneId || 'hall', parseInt(btn.dataset.cancelSeat, 10));
-        });
-    });
-    bookingGrid.querySelectorAll('.booking__seat').forEach(function(seat) {
-        seat.addEventListener('mouseenter', function() { showPcInfo(parseInt(seat.dataset.seat, 10), seat.dataset.zoneId || 'hall'); });
-        seat.addEventListener('mouseleave', function() { hidePcInfo(); });
-    });
-    renderBookingScheme();
-}
-
-function renderBookingScheme() {
-    var floorEl = document.getElementById('booking-scheme-floor');
-    var scheme = getBookingScheme();
-    if (!floorEl || !scheme.zones || !scheme.zones.length) return;
-    var bookings = getBookings();
-    var zone0 = scheme.zones[0];
-    var zx = zone0.x || 10;
-    var zy = zone0.y || 15;
-    var zw = zone0.width || 80;
-    var zh = zone0.height || 70;
-    var html = '';
-    html += '<div class="booking__scheme-entrance" aria-hidden="true"><span class="booking__scheme-entrance-arrow">↑</span><span class="booking__scheme-entrance-text">Вход</span></div>';
-    html += '<div class="booking__scheme-room-name" style="left:' + (zx + zw / 2) + '%;top:' + (zy - 4) + '%;" aria-hidden="true">Кабинет 210</div>';
-    html += '<div class="booking__scheme-line booking__scheme-line--top" style="left:' + zx + '%;top:' + zy + '%;width:' + zw + '%"></div>';
-    html += '<div class="booking__scheme-line booking__scheme-line--middle" style="left:' + zx + '%;top:' + (zy + zh / 2) + '%;width:' + zw + '%"></div>';
-    html += '<div class="booking__scheme-line booking__scheme-line--bottom" style="left:' + zx + '%;top:' + (zy + zh) + '%;width:' + zw + '%"></div>';
-    scheme.zones.forEach(function(zone) {
-        var rows = zone.rows || 1;
-        var cols = zone.cols || 1;
-        var start = zone.startSeatId || 1;
-        var zoneStyle = 'left:' + (zone.x || 0) + '%;top:' + (zone.y || 0) + '%;width:' + (zone.width || 80) + '%;height:' + (zone.height || 70) + '%;';
-        html += '<div class="booking__scheme-zone" style="' + zoneStyle + '" data-zone="' + (zone.id || '') + '">';
-        var gridRows = '1fr 1fr 0.35fr 1fr 1fr';
-        if (rows !== 4) gridRows = 'repeat(' + rows + ',1fr)';
-        html += '<div class="booking__scheme-zone-grid" style="grid-template-columns:repeat(' + cols + ',1fr);grid-template-rows:' + gridRows + ';">';
-        var zoneId = zone.id || 'hall';
-        for (var r = 0; r < rows; r++) {
-            if (rows === 4 && r === 2) {
-                html += '<div class="booking__scheme-row-spacer" style="grid-column:1/-1;"></div>';
-            }
-            for (var c = 0; c < cols; c++) {
-                var seatId = start + r * cols + c;
-                var key = typeof getBookingKey === 'function' ? getBookingKey(zoneId, seatId) : seatId;
-                var seatBooking = bookings[key];
-                var booked = !!seatBooking;
-                var cls = 'booking__scheme-seat' + (booked ? ' booking__scheme-seat--booked' : '');
-                var schemeTitle = 'Место ' + seatId;
-                if (booked) schemeTitle += ' · Забронировано: ' + (seatBooking.userFio || seatBooking.userEmail || '');
-                html += '<div class="' + cls + '" data-seat="' + seatId + '" data-zone="' + (zoneId.replace(/"/g, '&quot;')) + '" role="button" tabindex="0" title="' + (schemeTitle.replace(/"/g, '&quot;')) + '">';
-                html += '<span class="booking__scheme-seat-num">' + seatId + '</span>';
-                if (booked) {
-                    html += '<span class="booking__scheme-seat-fio">' + (seatBooking.userFio || seatBooking.userEmail || '').replace(/</g, '&lt;') + '</span>';
-                    html += '<span class="booking__scheme-seat-time">' + (seatBooking.time || '') + '</span>';
-                }
-                html += '</div>';
-            }
-        }
-        html += '</div></div>';
-    });
-    floorEl.innerHTML = html;
-    floorEl.querySelectorAll('.booking__scheme-seat').forEach(function(el) {
-        var seatId = parseInt(el.dataset.seat, 10);
-        var zoneId = el.dataset.zone || 'hall';
-        el.addEventListener('click', function(e) {
-            e.preventDefault();
-            if (!getCurrentUser()) {
-                alert('Для бронирования необходимо зарегистрироваться');
-                return;
-            }
-            if (el.classList.contains('booking__scheme-seat--booked')) return;
-            openBookingModal(zoneId, seatId);
-        });
-        el.addEventListener('mouseenter', function() { showPcInfo(seatId, zoneId); });
-        el.addEventListener('mouseleave', function() { hidePcInfo(); });
-    });
-}
-
-var bookingListEl = document.getElementById('booking-view-list');
-var bookingSchemeEl = document.getElementById('booking-view-scheme');
-document.querySelectorAll('.booking__tab').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        var view = btn.dataset.view;
-        document.querySelectorAll('.booking__tab').forEach(function(b) {
-            b.classList.toggle('booking__tab--active', b.dataset.view === view);
-            b.setAttribute('aria-pressed', b.dataset.view === view ? 'true' : 'false');
-        });
-        if (bookingListEl) bookingListEl.classList.toggle('booking__view--hidden', view !== 'list');
-        if (bookingSchemeEl) bookingSchemeEl.classList.toggle('booking__view--hidden', view !== 'scheme');
-        if (view === 'scheme') renderBookingScheme();
-    });
-});
-
-/** Доступные слоты бронирования: по умолчанию зал 9:00–18:00, но список можно настроить в админке. */
-function getCurrentAllowedBookingSlots() {
-    // Если есть конфиг в localStorage (настроенный через админку) — используем его.
-    if (typeof getBookingSlotsConfig === 'function') {
-        var cfg = getBookingSlotsConfig();
-        if (Array.isArray(cfg) && cfg.length) return cfg;
-    }
-    // Иначе — дефолт из kiber-arena-data.js
-    if (typeof DEFAULT_BOOKING_SLOTS !== 'undefined' && DEFAULT_BOOKING_SLOTS && DEFAULT_BOOKING_SLOTS.length) {
-        return DEFAULT_BOOKING_SLOTS;
-    }
-    return [];
-}
-
-function formatBookingDate(dateStr) {
-    if (!dateStr) return '';
-    var d = new Date(dateStr + 'T12:00:00');
-    var months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-    return d.getDate() + ' ' + (months[d.getMonth()] || '');
-}
-
-function updateBookingTimeSummary() {
-    var dateInput = document.getElementById('booking-date-input');
-    var startVal = document.getElementById('booking-time-start').value;
-    var endVal = document.getElementById('booking-time-end').value;
-    var dateStr = dateInput ? dateInput.value : '';
-    var dateLabel = dateStr ? formatBookingDate(dateStr) : '';
-    var elDate = document.getElementById('booking-summary-date');
-    var elDateEnd = document.getElementById('booking-summary-date-end');
-    var elStart = document.getElementById('booking-summary-start');
-    var elEnd = document.getElementById('booking-summary-end');
-    var elDuration = document.getElementById('booking-duration-text');
-    if (elDate) elDate.textContent = dateLabel;
-    if (elDateEnd) elDateEnd.textContent = dateLabel;
-    if (elStart) elStart.textContent = startVal || '—';
-    if (elEnd) elEnd.textContent = endVal || '—';
-    if (elDuration && startVal && endVal) {
-        elDuration.textContent = 'Продолжительность 20 мин';
-    }
-}
-
-function initBookingTimePicker() {
-    var listEl = document.getElementById('booking-time-slots-list');
-    var dateInput = document.getElementById('booking-date-input');
-    if (!listEl) return;
-    var slots = getCurrentAllowedBookingSlots();
-    listEl.innerHTML = slots.map(function(slot, idx) {
-        return '<div class="booking-time-picker__option booking-time-picker__option--slot" data-start="' + slot.start + '" data-end="' + slot.end + '" role="option" tabindex="0">' + slot.start + ' – ' + slot.end + '</div>';
-    }).join('');
-    listEl.querySelectorAll('.booking-time-picker__option--slot').forEach(function(opt) {
-        opt.addEventListener('click', function() {
-            var start = opt.dataset.start;
-            var end = opt.dataset.end;
-            document.getElementById('booking-time-start').value = start;
-            document.getElementById('booking-time-end').value = end;
-            listEl.querySelectorAll('.booking-time-picker__option--slot').forEach(function(o) { o.classList.remove('booking-time-picker__option--selected'); });
-            opt.classList.add('booking-time-picker__option--selected');
-            updateBookingTimeSummary();
-        });
-    });
-    if (dateInput) {
-        var today = new Date();
-        var y = today.getFullYear();
-        var m = (today.getMonth() + 1) < 10 ? '0' + (today.getMonth() + 1) : (today.getMonth() + 1);
-        var day = today.getDate() < 10 ? '0' + today.getDate() : today.getDate();
-        dateInput.value = y + '-' + m + '-' + day;
-        dateInput.addEventListener('change', function() {
-            document.getElementById('booking-date').value = dateInput.value;
-            updateBookingTimeSummary();
-        });
-    }
-}
+// ==================== БРОНИРОВАНИЕ (МОДАЛЬНЫЕ ОКНА) ====================
+var ALLOWED_BOOKING_SLOTS = [
+    { start: '10:00', end: '10:20' },
+    { start: '10:30', end: '10:50' },
+    { start: '11:50', end: '12:10' },
+    { start: '12:20', end: '12:40' },
+    { start: '13:40', end: '14:00' },
+    { start: '14:10', end: '14:30' },
+    { start: '15:30', end: '15:50' },
+    { start: '16:00', end: '16:20' }
+];
 
 var bookingModalSeat = null;
-var bookingModalZoneId = 'hall';
-function openBookingModal(zoneId, seatId) {
-    if (arguments.length === 1 && typeof zoneId === 'number') { seatId = zoneId; zoneId = 'hall'; }
-    bookingModalZoneId = zoneId || 'hall';
+
+function openBookingModal(seatId) {
     bookingModalSeat = seatId;
     document.getElementById('booking-modal-seat').textContent = seatId;
-    var dateInput = document.getElementById('booking-date-input');
-    var today = new Date();
-    var y = today.getFullYear();
-    var m = (today.getMonth() + 1) < 10 ? '0' + (today.getMonth() + 1) : (today.getMonth() + 1);
-    var day = today.getDate() < 10 ? '0' + today.getDate() : today.getDate();
-    if (dateInput) dateInput.value = y + '-' + m + '-' + day;
-    document.getElementById('booking-date').value = dateInput ? dateInput.value : '';
-    var slots = getCurrentAllowedBookingSlots();
-    var first = slots[0];
-    document.getElementById('booking-time-start').value = first ? first.start : '';
-    document.getElementById('booking-time-end').value = first ? first.end : '';
-    var listEl = document.getElementById('booking-time-slots-list');
-    if (listEl && first) {
-        listEl.querySelectorAll('.booking-time-picker__option--slot').forEach(function(o) { o.classList.remove('booking-time-picker__option--selected'); });
-        var firstOpt = listEl.querySelector('[data-start="' + first.start + '"]');
-        if (firstOpt) firstOpt.classList.add('booking-time-picker__option--selected');
-    }
-    updateBookingTimeSummary();
+    
+    var first = ALLOWED_BOOKING_SLOTS[0];
+    document.getElementById('booking-time-start').value = first.start;
+    document.getElementById('booking-time-end').value = first.end;
+    
     document.getElementById('booking-modal').classList.remove('modal--hidden');
 }
 
 function closeBookingModal() {
     document.getElementById('booking-modal').classList.add('modal--hidden');
     bookingModalSeat = null;
-    bookingModalZoneId = 'hall';
-}
-
-function cancelBooking(zoneId, seatId) {
-    if (arguments.length === 1) { seatId = zoneId; zoneId = 'hall'; }
-    zoneId = zoneId || 'hall';
-    var key = typeof getBookingKey === 'function' ? getBookingKey(zoneId, seatId) : seatId;
-    var bookings = getBookings();
-    delete bookings[key];
-    setBookings(bookings);
-    renderBooking();
 }
 
 document.getElementById('booking-form').addEventListener('submit', function(e) {
     e.preventDefault();
-    var dateInput = document.getElementById('booking-date-input');
-    var dateVal = dateInput ? dateInput.value : '';
     var timeStart = document.getElementById('booking-time-start').value.trim();
     var timeEnd = document.getElementById('booking-time-end').value.trim();
+    
     if (!timeStart || !timeEnd || !bookingModalSeat) return;
-    var allowedSlots = getCurrentAllowedBookingSlots();
-    var allowed = allowedSlots.some(function(s) { return s.start === timeStart && s.end === timeEnd; });
+    
+    var allowed = ALLOWED_BOOKING_SLOTS.some(function(s) { 
+        return s.start === timeStart && s.end === timeEnd; 
+    });
+    
     if (!allowed) {
-        alert('Выберите один из доступных слотов (зал 9:00–18:00).');
+        alert('Выберите один из доступных слотов');
         return;
     }
+    
     var time = timeStart + '–' + timeEnd;
-    var user = getCurrentUser();
-    if (!user) return;
-    var zoneId = bookingModalZoneId || 'hall';
-    var key = typeof getBookingKey === 'function' ? getBookingKey(zoneId, bookingModalSeat) : bookingModalSeat;
-    var bookings = getBookings();
-    var entry = { time: time, userEmail: user.email || '', userFio: user.fio || '', date: dateVal || undefined };
-    bookings[key] = entry;
-    setBookings(bookings);
-    if (typeof addToBookingHistory === 'function') {
-      addToBookingHistory({
-        seatId: bookingModalSeat,
-        time: time,
-        date: dateVal || undefined,
-        userEmail: user.email || '',
-        userFio: user.fio || '',
-        bookedAt: new Date().toISOString()
-      });
-    }
-    if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-    closeBookingModal();
-    renderBooking();
+    createBooking(bookingModalSeat, time);
 });
 
 document.getElementById('booking-cancel').addEventListener('click', closeBookingModal);
 document.querySelector('#booking-modal .modal__overlay').addEventListener('click', closeBookingModal);
-if (document.getElementById('booking-time-slots-list')) initBookingTimePicker();
-
-function showPcInfo(seatId, zoneId) {
-    var spec = PC_SPECS[seatId - 1];
-    var info = document.getElementById('booking-pc-info');
-    var zoneLabel = zoneId ? ' · ' + zoneId : '';
-    info.innerHTML = '<p class="booking__pc-spec"><strong>Место ' + seatId + (zoneLabel || '') + '</strong></p>' +
-        '<p class="booking__pc-spec">Видеокарта: ' + (spec.gpu || '—') + '</p>' +
-        '<p class="booking__pc-spec">Процессор: ' + (spec.cpu || '—') + '</p>' +
-        '<p class="booking__pc-spec">ОЗУ: ' + (spec.ram || '—') + '</p>' +
-        '<p class="booking__pc-spec">Монитор: ' + (spec.monitor || '—') + '</p>';
-}
-
-function hidePcInfo() {
-    document.getElementById('booking-pc-info').innerHTML = '<p class="booking__pc-placeholder">Наведите на место, чтобы увидеть характеристики</p>';
-}
 
 // ==================== ОБМЕН ====================
+async function purchaseItem(userEmail, itemId, itemType, price) {
+    try {
+        const baseUrl = window.location.origin;
+        const response = await fetch(`${baseUrl}/api/purchase`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: userEmail,
+                item_id: itemId,
+                item_type: itemType
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const currentUser = getCurrentUser();
+            if (currentUser) {
+                currentUser.arcoins = data.new_balance;
+                setCurrentUser(currentUser);
+            }
+            
+            showNotification(`✅ Куплено!`, 'success');
+            renderExchange();
+            renderHeaderUser();
+        } else {
+            showNotification(`❌ ${data.detail}`, 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка покупки:', error);
+        showNotification('❌ Ошибка подключения к серверу', 'error');
+    }
+}
+
 function renderExchange() {
     var user = getCurrentUser();
     var authMsg = document.getElementById('exchange-auth-msg');
     var shop = document.getElementById('exchange-shop');
+    
     if (authMsg && shop) {
         if (!user || !user.email) {
             authMsg.classList.remove('exchange__auth-msg--hidden');
@@ -992,181 +750,168 @@ function renderExchange() {
         authMsg.classList.add('exchange__auth-msg--hidden');
         shop.classList.remove('exchange__auth-msg--hidden');
     }
-    var cust = typeof getUserCustomization === 'function' ? getUserCustomization(user ? user.email : '') : { ownedFrames: [], ownedBanners: [], equippedFrame: 'frame-none', equippedBanner: 'banner-none' };
+    
     var coins = user.arcoins || 100;
 
     var framesEl = document.getElementById('exchange-frames');
-    var frames = typeof getCustomizationFrames === 'function' ? getCustomizationFrames() : [];
-    if (framesEl && frames.length) {
+    var frames = [
+        { id: 'frame-none', name: 'Без рамки', price: 0 },
+        { id: 'frame-gold', name: 'Золотая рамка', price: 15 },
+        { id: 'frame-neon', name: 'Неоновая рамка', price: 25 },
+        { id: 'frame-silver', name: 'Серебряная рамка', price: 20 },
+        { id: 'frame-rainbow', name: 'Радужная рамка', price: 35 }
+    ];
+    
+    if (framesEl) {
         framesEl.innerHTML = frames.map(function(f) {
-            var owned = cust.ownedFrames.indexOf(f.id) !== -1;
-            var equipped = cust.equippedFrame === f.id;
-            var canBuy = !owned && f.price > 0 && coins >= f.price;
-            var btnText = equipped ? 'Надето' : owned ? 'Надеть' : (f.price === 0 ? 'Бесплатно' : (coins >= f.price ? 'Купить (' + f.price + ')' : f.price + ' ARcoins'));
-            var disabled = equipped || (f.price > 0 && !owned && coins < f.price);
+            var btnText = f.price === 0 ? 'Бесплатно' : (coins >= f.price ? `Купить (${f.price})` : `${f.price} ARcoins`);
+            var disabled = f.price > 0 && coins < f.price;
+            
             return '<div class="exchange-item" data-frame-id="' + f.id + '">' +
                 '<div class="exchange-item__preview exchange-item__preview--frame custom-frame custom-frame--' + f.id + '"></div>' +
                 '<p class="exchange-item__name">' + (f.name || '') + '</p>' +
                 '<p class="exchange-item__price">' + (f.price === 0 ? 'Бесплатно' : f.price + ' ARcoins') + '</p>' +
-                '<button type="button" class="admin-btn exchange-item__btn" data-fid="' + f.id + '"' + (disabled ? ' disabled' : '') + '>' + btnText + '</button></div>';
+                '<button type="button" class="admin-btn exchange-item__btn" data-fid="' + f.id + '" data-price="' + f.price + '"' + (disabled ? ' disabled' : '') + '>' + btnText + '</button></div>';
         }).join('');
+        
         framesEl.querySelectorAll('[data-fid]').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
+            btn.addEventListener('click', function() {
                 var id = btn.dataset.fid;
-                if (!user || !user.email) return;
-                var owned = cust.ownedFrames.indexOf(id) !== -1;
-                var f = frames.find(function(x) { return x.id === id; });
-                var price = f ? f.price : 0;
-                if (owned || price === 0) {
-                    if (typeof purchaseFrame === 'function') {
-                        purchaseFrame(user.email, id);
-                        if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-                    }
-                    renderExchange();
-                    renderHeaderUser();
-                    return;
-                }
-                try {
-                    var baseUrl = window.location.origin;
-                    var res = await fetch(baseUrl + '/api/purchase', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: user.email, item_type: 'frame', item_id: id })
-                    });
-                    var data = await res.json();
-                    if (res.ok && data.success) {
-                        user.arcoins = data.new_balance;
-                        setCurrentUser(user);
-                        if (typeof addOwnedFrame === 'function') addOwnedFrame(user.email, id);
-                        if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-                        renderExchange();
-                        renderHeaderUser();
-                    } else {
-                        alert(data.detail || 'Не удалось купить');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Ошибка соединения с сервером');
+                var price = parseInt(btn.dataset.price);
+                if (price === 0) {
+                    showNotification('✅ У вас уже есть эта рамка', 'success');
+                } else {
+                    purchaseItem(user.email, id, 'frame', price);
                 }
             });
         });
     }
 
     var bannersEl = document.getElementById('exchange-banners');
-    var banners = typeof getCustomizationBanners === 'function' ? getCustomizationBanners() : [];
-    if (bannersEl && banners.length) {
+    var banners = [
+        { id: 'banner-none', name: 'Без баннера', price: 0 },
+        { id: 'banner-blue', name: 'Синий градиент', price: 20 },
+        { id: 'banner-purple', name: 'Фиолетовый градиент', price: 25 },
+        { id: 'banner-fire', name: 'Огненный градиент', price: 30 },
+        { id: 'banner-cyber', name: 'Кибер-сетка', price: 40 }
+    ];
+    
+    if (bannersEl) {
         bannersEl.innerHTML = banners.map(function(b) {
-            var owned = cust.ownedBanners.indexOf(b.id) !== -1;
-            var equipped = cust.equippedBanner === b.id;
-            var canBuy = !owned && b.price > 0 && coins >= b.price;
-            var btnText = equipped ? 'Надето' : owned ? 'Надеть' : (b.price === 0 ? 'Бесплатно' : (coins >= b.price ? 'Купить (' + b.price + ')' : b.price + ' ARcoins'));
-            var disabled = equipped || (b.price > 0 && !owned && coins < b.price);
+            var btnText = b.price === 0 ? 'Бесплатно' : (coins >= b.price ? `Купить (${b.price})` : `${b.price} ARcoins`);
+            var disabled = b.price > 0 && coins < b.price;
+            
             return '<div class="exchange-item" data-banner-id="' + b.id + '">' +
                 '<div class="exchange-item__preview exchange-item__preview--banner custom-banner custom-banner--' + b.id + '"></div>' +
                 '<p class="exchange-item__name">' + (b.name || '') + '</p>' +
                 '<p class="exchange-item__price">' + (b.price === 0 ? 'Бесплатно' : b.price + ' ARcoins') + '</p>' +
-                '<button type="button" class="admin-btn exchange-item__btn" data-bid="' + b.id + '"' + (disabled ? ' disabled' : '') + '>' + btnText + '</button></div>';
+                '<button type="button" class="admin-btn exchange-item__btn" data-bid="' + b.id + '" data-price="' + b.price + '"' + (disabled ? ' disabled' : '') + '>' + btnText + '</button></div>';
         }).join('');
+        
         bannersEl.querySelectorAll('[data-bid]').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
+            btn.addEventListener('click', function() {
                 var id = btn.dataset.bid;
-                if (!user || !user.email) return;
-                var owned = cust.ownedBanners.indexOf(id) !== -1;
-                var b = banners.find(function(x) { return x.id === id; });
-                var price = b ? b.price : 0;
-                if (owned || price === 0) {
-                    if (typeof purchaseBanner === 'function') {
-                        purchaseBanner(user.email, id);
-                        if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-                    }
-                    renderExchange();
-                    renderHeaderUser();
-                    return;
-                }
-                try {
-                    var baseUrl = window.location.origin;
-                    var res = await fetch(baseUrl + '/api/purchase', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: user.email, item_type: 'banner', item_id: id })
-                    });
-                    var data = await res.json();
-                    if (res.ok && data.success) {
-                        user.arcoins = data.new_balance;
-                        setCurrentUser(user);
-                        if (typeof addOwnedBanner === 'function') addOwnedBanner(user.email, id);
-                        if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-                        renderExchange();
-                        renderHeaderUser();
-                    } else {
-                        alert(data.detail || 'Не удалось купить');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Ошибка соединения с сервером');
+                var price = parseInt(btn.dataset.price);
+                if (price === 0) {
+                    showNotification('✅ У вас уже есть этот баннер', 'success');
+                } else {
+                    purchaseItem(user.email, id, 'banner', price);
                 }
             });
         });
     }
 
     var gifsEl = document.getElementById('exchange-gifs');
-    var readyGifs = typeof getReadyGifBanners === 'function' ? getReadyGifBanners() : [];
-    if (gifsEl && readyGifs.length) {
+    var readyGifs = [
+        { id: 'gif-banner-1', name: 'Кибер-неон', price: 35 },
+        { id: 'gif-banner-2', name: 'Огонь', price: 45 },
+        { id: 'gif-banner-3', name: 'Звёзды', price: 55 },
+        { id: 'gif-banner-4', name: 'Волны', price: 65 },
+        { id: 'gif-banner-5', name: 'Геометрия', price: 80 },
+        { id: 'gif-banner-6', name: 'Космос', price: 100 }
+    ];
+    
+    if (gifsEl) {
         gifsEl.innerHTML = readyGifs.map(function(g) {
-            var owned = cust.ownedBanners.indexOf(g.id) !== -1;
-            var equipped = cust.equippedBanner === g.id;
-            var btnText = equipped ? 'Надето' : owned ? 'Надеть' : (coins >= g.price ? 'Купить (' + g.price + ')' : g.price + ' ARcoins');
-            var disabled = equipped || (!owned && coins < g.price);
+            var btnText = coins >= g.price ? `Купить (${g.price})` : `${g.price} ARcoins`;
+            var disabled = coins < g.price;
+            
             return '<div class="exchange-item" data-gif-id="' + g.id + '">' +
-                '<div class="exchange-item__preview exchange-item__preview--gif" style="background-image:url(' + (g.gifUrl ? g.gifUrl.replace(/"/g, '&quot;') : '') + ')"></div>' +
+                '<div class="exchange-item__preview exchange-item__preview--gif" style="background: #2a2a35;"></div>' +
                 '<p class="exchange-item__name">' + (g.name || '') + '</p>' +
                 '<p class="exchange-item__price">' + g.price + ' ARcoins</p>' +
-                '<button type="button" class="admin-btn exchange-item__btn" data-gid="' + g.id + '"' + (disabled ? ' disabled' : '') + '>' + btnText + '</button></div>';
+                '<button type="button" class="admin-btn exchange-item__btn" data-gid="' + g.id + '" data-price="' + g.price + '"' + (disabled ? ' disabled' : '') + '>' + btnText + '</button></div>';
         }).join('');
+        
         gifsEl.querySelectorAll('[data-gid]').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
+            btn.addEventListener('click', function() {
                 var id = btn.dataset.gid;
-                if (!user || !user.email) return;
-                var owned = cust.ownedBanners.indexOf(id) !== -1;
-                var g = readyGifs.find(function(x) { return x.id === id; });
-                var price = g ? g.price : 0;
-                if (owned) {
-                    if (typeof purchaseReadyGifBanner === 'function') {
-                        purchaseReadyGifBanner(user.email, id);
-                        if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-                    }
-                    renderExchange();
-                    renderHeaderUser();
-                    return;
-                }
-                try {
-                    var baseUrl = window.location.origin;
-                    var res = await fetch(baseUrl + '/api/purchase', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: user.email, item_type: 'gif', item_id: id })
-                    });
-                    var data = await res.json();
-                    if (res.ok && data.success) {
-                        user.arcoins = data.new_balance;
-                        setCurrentUser(user);
-                        if (typeof addOwnedGifBanner === 'function') addOwnedGifBanner(user.email, id);
-                        if (typeof checkAndAwardAchievements === 'function') checkAndAwardAchievements(user.email);
-                        renderExchange();
-                        renderHeaderUser();
-                    } else {
-                        alert(data.detail || 'Не удалось купить');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Ошибка соединения с сервером');
-                }
+                var price = parseInt(btn.dataset.price);
+                purchaseItem(user.email, id, 'gif', price);
             });
         });
     }
 }
 
-// ==================== ЛИДЕРБОРД ИЗ БД ====================
+// ==================== УВЕДОМЛЕНИЯ ====================
+function showNotification(message, type) {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        container.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        `;
+        document.body.appendChild(container);
+    }
+    
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        background: #252525;
+        border-left: 4px solid ${type === 'success' ? '#00ff88' : '#ff4444'};
+        border-radius: 12px;
+        padding: 16px 20px;
+        color: white;
+        margin-bottom: 10px;
+        box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        animation: slideIn 0.3s ease forwards;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    `;
+    
+    notification.innerHTML = `
+        <span style="font-size:1.5rem; color:${type === 'success' ? '#00ff88' : '#ff4444'};">${type === 'success' ? '✅' : '❌'}</span>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = 'fadeOut 0.3s ease forwards';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Добавляем CSS анимации
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// ==================== ЛИДЕРБОРД (СТАРАЯ ФУНКЦИЯ ДЛЯ СОВМЕСТИМОСТИ) ====================
 function renderLeaderboard() {
     loadLeaderboardFromDB();
 }
@@ -1175,16 +920,22 @@ function renderLeaderboard() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🟢 Страница загружена, инициализация...');
     
+    // Загружаем турниры
+    if (document.getElementById('tournaments-content')) {
+        loadTournamentsFromDB();
+    }
+    
+    // Загружаем компьютеры для бронирования
+    if (document.getElementById('booking-content')) {
+        loadComputersFromDB();
+    }
+    
     // Проверяем права админа
     checkAdminStatus();
     
-    // Загружаем лидерборд если мы на главной странице
+    // Загружаем лидерборд
     if (document.getElementById('leaderboard-content')) {
-        // Первая загрузка
         loadLeaderboardFromDB();
-        
-        // Автоматическое обновление каждую минуту
         setInterval(loadLeaderboardFromDB, 60000);
-        console.log('⏱️ Автообновление лидерборда каждую минуту');
     }
 });
