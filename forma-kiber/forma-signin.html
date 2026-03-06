@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="forma-signin.css">
+    <title>Sign in "Кибер-арена"</title>
+    <style>
+        .notification-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 350px;
+        }
+        .notification {
+            background: #252525;
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: white;
+            transform: translateX(100%);
+            animation: slideIn 0.3s ease forwards;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            border-left: 4px solid;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+        .notification.success {
+            border-left-color: #00ff88;
+        }
+        .notification.error {
+            border-left-color: #ff4444;
+        }
+        .notification__icon {
+            font-size: 1.5rem;
+        }
+        .notification.success .notification__icon {
+            color: #00ff88;
+        }
+        .notification.error .notification__icon {
+            color: #ff4444;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .notification.fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+        @keyframes fadeOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+  <div class="signin-page">
+    <header class="page-header">
+      <img src="logo.png" alt="Московское образование. IT.МОСКВА" class="page-header__logo">
+    </header>
+    <div class="container">
+    <div class="heading">Вход</div>
+    <div class="heading kiber">Кибер-арена</div>
+    <form action="" class="form" id="signin-form">
+      <input required="" class="input" type="email" name="email" id="email" placeholder="Почта">
+      <input required="" class="input" type="password" name="password" id="password" placeholder="Пароль">
+      <span class="forgot-password"><a href="#"></a></span>
+      <input class="login-button" type="submit" value="Войти">
+      
+    </form>
+    <div class="social-account-container">
+        
+    </div>
+	<p class="signup">Нет аккаунта?
+		<a rel="noopener noreferrer" href="forma-signup.html" class="regi">Регистрация</a>
+	</p>
+</div>
+  </div>
+  
+  <!-- Контейнер для уведомлений -->
+  <div id="notification-container" class="notification-container"></div>
+  
+  <script src="../kiber-arena-data.js"></script>
+  <script>
+    // Функция для показа уведомления
+    function showNotification(message, type) {
+        const container = document.getElementById('notification-container');
+        
+        // Удаляем предыдущее уведомление
+        const oldNotification = container.querySelector('.notification');
+        if (oldNotification) oldNotification.remove();
+        
+        // Создаем уведомление
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        const icon = type === 'success' ? '✅' : '❌';
+        
+        notification.innerHTML = `
+            <span class="notification__icon">${icon}</span>
+            <span>${message}</span>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Удаляем через 2 секунды и перенаправляем если успех
+        setTimeout(() => {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                notification.remove();
+                if (type === 'success') {
+                    window.location.href = '../kiber-arena.html';
+                }
+            }, 300);
+        }, 2000);
+    }
+  
+    (function() {
+      if (typeof initStorage === 'function') initStorage();
+      var form = document.getElementById('signin-form');
+      if (form) {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          var email = (document.getElementById('email') || {}).value;
+          var password = (document.getElementById('password') || {}).value;
+          if (!email || !password) return;
+          
+          // Сначала проверяем в локальном хранилище (для старых пользователей)
+          var users = typeof getUsers === 'function' ? getUsers() : [];
+          var localUser = users.find(function(u) { return u.email === email && u.password === password; });
+          
+          if (localUser && typeof setCurrentUser === 'function') {
+            setCurrentUser(localUser);
+            showNotification('Успешный вход', 'success');
+            return;
+          }
+          
+          // Если нет в локальном, проверяем на сервере
+          try {
+            const response = await fetch('/api/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+              // Сохраняем пользователя в локальное хранилище
+              if (typeof setCurrentUser === 'function') {
+                setCurrentUser(data.user);
+              }
+              showNotification('Успешный вход', 'success');
+            } else {
+              showNotification('Неверная почта или пароль', 'error');
+            }
+          } catch (error) {
+            console.error('Ошибка сервера:', error);
+            showNotification('Неверная почта или пароль', 'error');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
